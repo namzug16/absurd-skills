@@ -1,0 +1,80 @@
+# Native Select
+
+- JavaScript: none (CSS only)
+
+## Usage
+
+Add `class="select"` to a native `<select>`. Use standard `<option>` and `<optgroup>` elements.
+
+```html
+<select class="select" aria-label="Fruit">
+  <option value="">Select a fruit</option>
+  <option value="apple">Apple</option>
+  <option value="banana">Banana</option>
+  <option value="blueberry">Blueberry</option>
+  <option value="pineapple">Pineapple</option>
+</select>
+```
+
+Use Native Select for native browser behavior, form integration, and mobile-optimized pickers. Use [Select](./select.md) for custom option content, multi-select behavior, or JavaScript APIs.
+
+## Examples
+
+### Groups
+
+```html
+<select class="select w-full" aria-label="Food">
+  <option value="">Select food</option>
+  <optgroup label="Fruits">
+    <option value="apple">Apple</option>
+    <option value="banana">Banana</option>
+    <option value="blueberry">Blueberry</option>
+  </optgroup>
+  <optgroup label="Vegetables">
+    <option value="carrot">Carrot</option>
+    <option value="potato">Potato</option>
+    <option value="tomato">Tomato</option>
+  </optgroup>
+</select>
+```
+
+### Disabled
+
+```html
+<select class="select w-full" aria-label="Fruit" disabled>
+  <option value="">Select a fruit</option>
+  <option value="apple">Apple</option>
+  <option value="banana">Banana</option>
+</select>
+```
+
+### Invalid
+
+```html
+<div role="group" class="field" data-invalid="true">
+  <label for="native-select-invalid">Fruit</label>
+  <select id="native-select-invalid" class="select w-full" aria-invalid="true" aria-describedby="native-select-invalid-error">
+    <option value="">Select a fruit</option>
+    <option value="apple">Apple</option>
+    <option value="banana">Banana</option>
+  </select>
+  <p id="native-select-invalid-error" role="alert">Select a fruit to continue.</p>
+</div>
+```
+
+### Size
+
+```html
+<div class="flex flex-wrap items-center gap-3">
+  <select class="select w-42" aria-label="Default size">
+    <option>Default</option>
+    <option>Apple</option>
+    <option>Banana</option>
+  </select>
+  <select class="select w-42" data-size="sm" aria-label="Small size">
+    <option>Small</option>
+    <option>Apple</option>
+    <option>Banana</option>
+  </select>
+</div>
+```

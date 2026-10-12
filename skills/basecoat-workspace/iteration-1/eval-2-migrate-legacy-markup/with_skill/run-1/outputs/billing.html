@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Billing</title>
+  <link rel="stylesheet" href="/static/app.css" />
+  <script src="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/js/all.min.js" defer></script>
+</head>
+<body class="p-8">
+  <div class="alert mb-6" data-variant="destructive">
+    <h2>Payment failed</h2>
+    <section>Your last invoice could not be charged.</section>
+  </div>
+  <div class="card max-w-xl">
+    <header>
+      <h2>Plan</h2>
+      <p>You are on the Team plan.</p>
+    </header>
+    <section class="flex items-center gap-2">
+      <span class="badge" data-variant="secondary">Team</span>
+      <span class="badge" data-variant="outline">Renews May 1</span>
+    </section>
+    <footer class="flex gap-2">
+      <button class="btn" data-variant="outline">Change plan</button>
+      <button class="btn" data-variant="ghost" data-size="sm">View invoices</button>
+      <button class="btn" data-variant="outline" data-size="icon" aria-label="Settings"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>
+      <button class="btn" data-variant="destructive">Cancel subscription</button>
+      <button class="btn">Update card</button>
+    </footer>
+  </div>
+</body>
+</html>

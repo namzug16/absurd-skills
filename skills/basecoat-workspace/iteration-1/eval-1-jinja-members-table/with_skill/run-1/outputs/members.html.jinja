@@ -1,0 +1,255 @@
+{% extends "base.html.jinja" %}
+
+{#
+  Members list (Basecoat 1.0 markup: root class + data-variant / data-size).
+
+  Context: members (id, name, email, role, status, avatar_url), page, total_pages.
+
+  Assumed Flask endpoints - rename to match your routes:
+    members.invite          GET   invite form
+    members.edit            GET   <member_id>
+    members.resend_invite   POST  <member_id>
+    members.remove          POST  <member_id>
+
+  The row menus need Basecoat's dropdown-menu script (included in "basecoat-css/all").
+#}
+
+{% macro icon(name, attrs="") -%}
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" {{ attrs|safe }}>
+    {%- if name == "plus" -%}
+      <path d="M5 12h14" /><path d="M12 5v14" />
+    {%- elif name == "ellipsis" -%}
+      <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
+    {%- elif name == "chevron-left" -%}
+      <path d="m15 18-6-6 6-6" />
+    {%- elif name == "chevron-right" -%}
+      <path d="m9 18 6-6-6-6" />
+    {%- elif name == "users" -%}
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    {%- elif name == "pencil" -%}
+      <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" />
+    {%- elif name == "send" -%}
+      <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /><path d="m21.854 2.147-10.94 10.939" />
+    {%- elif name == "trash" -%}
+      <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" />
+    {%- endif -%}
+  </svg>
+{%- endmacro %}
+
+{% macro csrf_field() -%}
+  {%- if csrf_token is defined -%}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  {%- endif -%}
+{%- endmacro %}
+
+{# URL of the current view with the same query string, on another page. #}
+{% macro page_url(target_page) -%}
+  {%- set params = dict(request.view_args or {}) -%}
+  {%- set _ = params.update(request.args.to_dict()) -%}
+  {%- set _ = params.update(page=target_page) -%}
+  {{- url_for(request.endpoint, **params) -}}
+{%- endmacro %}
+
+{% macro status_badge(status) -%}
+  {%- if status == "active" -%}
+    <span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">Active</span>
+  {%- elif status == "invited" -%}
+    <span class="badge bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">Invited</span>
+  {%- elif status == "suspended" -%}
+    <span class="badge" data-variant="destructive">Suspended</span>
+  {%- else -%}
+    <span class="badge" data-variant="outline">{{ status|capitalize }}</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% block content %}
+<div class="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-8">
+
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div class="grid gap-1">
+      <h1 class="text-2xl font-semibold tracking-tight">Members</h1>
+      <p class="text-sm text-muted-foreground">Manage who has access to this workspace.</p>
+    </div>
+    <a href="{{ url_for('members.invite') }}" class="btn">
+      {{ icon("plus", 'data-icon="inline-start"') }}
+      Invite member
+    </a>
+  </header>
+
+  {% if members %}
+    {# No .table-container here: its overflow would clip the row menus. #}
+    <div class="rounded-lg border">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th class="hidden md:table-cell">Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th class="w-px text-end"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for member in members %}
+            {% set display_name = member.name or member.email %}
+            {% set name_parts = display_name.split() %}
+            {% set initials = (name_parts[0][:1] ~ (name_parts[-1][:1] if name_parts|length > 1 else ""))|upper %}
+            {% set is_invited = member.status == "invited" %}
+            <tr>
+              <td>
+                <div class="flex items-center gap-3">
+                  <span class="avatar">
+                    {% if member.avatar_url %}
+                      <img src="{{ member.avatar_url }}" alt="" />
+                    {% endif %}
+                    <span>{{ initials }}</span>
+                  </span>
+                  <div class="grid min-w-0">
+                    <span class="truncate font-medium">{{ display_name }}</span>
+                    <span class="truncate text-sm text-muted-foreground md:hidden">{{ member.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="hidden text-muted-foreground md:table-cell">{{ member.email }}</td>
+              <td>{{ member.role|capitalize }}</td>
+              <td>{{ status_badge(member.status) }}</td>
+              <td class="text-end">
+                <div id="member-actions-{{ member.id }}" class="dropdown-menu">
+                  <button
+                    type="button"
+                    id="member-actions-{{ member.id }}-trigger"
+                    aria-label="Actions for {{ display_name }}"
+                    aria-haspopup="menu"
+                    aria-controls="member-actions-{{ member.id }}-menu"
+                    aria-expanded="false"
+                    class="btn"
+                    data-variant="ghost"
+                    data-size="icon-sm"
+                  >{{ icon("ellipsis") }}</button>
+                  <div id="member-actions-{{ member.id }}-popover" data-popover aria-hidden="true" data-align="end" class="min-w-40 text-start">
+                    <div role="menu" id="member-actions-{{ member.id }}-menu" aria-labelledby="member-actions-{{ member.id }}-trigger">
+                      <div role="group">
+                        <a role="menuitem" href="{{ url_for('members.edit', member_id=member.id) }}">
+                          {{ icon("pencil") }}
+                          Edit
+                        </a>
+                        {% if is_invited %}
+                          <div role="menuitem" onclick="document.getElementById('member-resend-{{ member.id }}').requestSubmit()">
+                            {{ icon("send") }}
+                            Resend invite
+                          </div>
+                        {% else %}
+                          <div role="menuitem" aria-disabled="true">
+                            {{ icon("send") }}
+                            Resend invite
+                          </div>
+                        {% endif %}
+                      </div>
+                      <hr role="separator" />
+                      <div role="group">
+                        <div
+                          role="menuitem"
+                          data-variant="destructive"
+                          data-remove-url="{{ url_for('members.remove', member_id=member.id) }}"
+                          data-member-name="{{ display_name }}"
+                          onclick="openRemoveMemberDialog(this)"
+                        >
+                          {{ icon("trash") }}
+                          Remove
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% if is_invited %}
+                  <form id="member-resend-{{ member.id }}" method="post" action="{{ url_for('members.resend_invite', member_id=member.id) }}" hidden>
+                    {{ csrf_field() }}
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <section class="empty rounded-lg border border-dashed">
+      <header>
+        <figure>{{ icon("users") }}</figure>
+        <h2>No members yet</h2>
+        <p class="max-w-xs text-pretty">Invite your teammates to start collaborating in this workspace.</p>
+      </header>
+      <footer>
+        <a href="{{ url_for('members.invite') }}" class="btn" data-size="sm">
+          {{ icon("plus", 'data-icon="inline-start"') }}
+          Invite member
+        </a>
+      </footer>
+    </section>
+  {% endif %}
+
+  {% if total_pages and total_pages > 1 %}
+    <nav role="navigation" aria-label="pagination" class="flex w-full items-center justify-between gap-4">
+      <p class="text-sm text-muted-foreground">Page {{ page }} of {{ total_pages }}</p>
+      <ul class="flex flex-row items-center gap-2">
+        <li>
+          {% if page > 1 %}
+            <a href="{{ page_url(page - 1) }}" rel="prev" class="btn" data-variant="outline" data-size="sm">
+              {{ icon("chevron-left", 'data-icon="inline-start"') }}
+              Previous
+            </a>
+          {% else %}
+            <button type="button" class="btn" data-variant="outline" data-size="sm" disabled>
+              {{ icon("chevron-left", 'data-icon="inline-start"') }}
+              Previous
+            </button>
+          {% endif %}
+        </li>
+        <li>
+          {% if page < total_pages %}
+            <a href="{{ page_url(page + 1) }}" rel="next" class="btn" data-variant="outline" data-size="sm">
+              Next
+              {{ icon("chevron-right", 'data-icon="inline-end"') }}
+            </a>
+          {% else %}
+            <button type="button" class="btn" data-variant="outline" data-size="sm" disabled>
+              Next
+              {{ icon("chevron-right", 'data-icon="inline-end"') }}
+            </button>
+          {% endif %}
+        </li>
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+
+{% if members %}
+  {# One shared confirmation for "Remove"; the menu item fills in the name and form action. #}
+  <dialog id="remove-member-dialog" class="alert-dialog" aria-labelledby="remove-member-title" aria-describedby="remove-member-description">
+    <div>
+      <header>
+        <h2 id="remove-member-title">Remove member?</h2>
+        <p id="remove-member-description">
+          <span id="remove-member-name" class="font-medium text-foreground"></span>
+          will lose access to this workspace. This cannot be undone.
+        </p>
+      </header>
+      <footer>
+        <button type="button" class="btn" data-variant="outline" onclick="this.closest('dialog').close()">Cancel</button>
+        <form id="remove-member-form" method="post">
+          {{ csrf_field() }}
+          <button type="submit" class="btn" data-variant="destructive">Remove</button>
+        </form>
+      </footer>
+    </div>
+  </dialog>
+
+  <script>
+    function openRemoveMemberDialog(item) {
+      document.getElementById('remove-member-name').textContent = item.dataset.memberName;
+      document.getElementById('remove-member-form').action = item.dataset.removeUrl;
+      document.getElementById('remove-member-dialog').showModal();
+    }
+  </script>
+{% endif %}
+{% endblock %}

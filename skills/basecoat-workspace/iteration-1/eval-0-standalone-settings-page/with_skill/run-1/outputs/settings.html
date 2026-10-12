@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings</title>
+
+  <!-- Apply the stored (or system) theme before styles load, so there is no flash. -->
+  <script>
+    (() => {
+      try {
+        const stored = localStorage.getItem("themeMode");
+        if (stored ? stored === "dark" : matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (_) {}
+    })();
+  </script>
+
+  <!-- Basecoat 1.0 from the CDN: standalone stylesheet + all interactive components. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/js/all.min.js" defer></script>
+
+  <!--
+    The CDN stylesheet ships Basecoat components and theme tokens, but not Tailwind's
+    utility classes. Page layout is therefore a few plain CSS rules built on the same
+    tokens, so everything follows light/dark mode automatically.
+  -->
+  <style>
+    .page {
+      max-width: 42rem;
+      margin-inline: auto;
+      padding: 2rem 1rem 6rem;
+      display: grid;
+      gap: 1.5rem;
+    }
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .page-header h1 {
+      font-size: 1.5rem;
+      line-height: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+    .page-header p {
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      color: var(--color-muted-foreground);
+    }
+    .form-stack {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    /* Theme toggle icons: sun in dark mode, moon in light mode. */
+    .theme-icon { display: contents; }
+    .theme-icon[data-show="dark"] { display: none; }
+    .dark .theme-icon[data-show="dark"] { display: contents; }
+    .dark .theme-icon[data-show="light"] { display: none; }
+
+    /* Basecoat overlays are positioned inline and .card clips overflow,
+       so let the timezone list escape the Account card. */
+    #account-card { overflow: visible; }
+
+    /* Full-width custom select trigger and a scrollable option list. */
+    #timezone,
+    #timezone > button { width: 100%; }
+    #timezone-listbox { max-height: 17.5rem; overflow-y: auto; }
+
+    .card > footer.end { justify-content: flex-end; }
+    .danger-title { color: var(--color-destructive); }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="page-header">
+      <div>
+        <h1>Settings</h1>
+        <p>Manage your account and preferences.</p>
+      </div>
+      <button type="button" class="btn" data-variant="outline" data-size="icon" aria-label="Toggle dark mode" onclick="window.basecoat.theme.toggle()">
+        <span class="theme-icon" data-show="dark">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+        </span>
+        <span class="theme-icon" data-show="light">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- Account -->
+    <div class="card" id="account-card">
+      <header>
+        <h2>Account</h2>
+        <p>Update your profile details and how we reach you.</p>
+      </header>
+      <section>
+        <form id="account-form" class="form-stack">
+          <div role="group" class="field">
+            <label for="account-name">Name</label>
+            <input id="account-name" name="name" type="text" autocomplete="name" placeholder="Ada Lovelace" required />
+          </div>
+
+          <div role="group" class="field">
+            <label for="account-email">Email</label>
+            <input id="account-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required aria-describedby="account-email-description" />
+            <p id="account-email-description">Used for sign-in and account notices.</p>
+          </div>
+
+          <div role="group" class="field">
+            <label for="timezone-trigger">Timezone</label>
+            <div id="timezone" class="select" data-placeholder="Select a timezone">
+              <button type="button" id="timezone-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="timezone-listbox">
+                <span>Coordinated Universal Time (UTC)</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+              </button>
+              <div id="timezone-popover" data-popover aria-hidden="true">
+                <div role="listbox" id="timezone-listbox" class="scrollbar-sm" aria-orientation="vertical" aria-labelledby="timezone-trigger">
+                  <div role="option" data-value="UTC">Coordinated Universal Time (UTC)</div>
+                  <hr role="separator" />
+                  <div role="group" aria-labelledby="timezone-group-americas">
+                    <span role="heading" id="timezone-group-americas">Americas</span>
+                    <div role="option" data-value="America/Los_Angeles">Pacific Time (Los Angeles)</div>
+                    <div role="option" data-value="America/Denver">Mountain Time (Denver)</div>
+                    <div role="option" data-value="America/Chicago">Central Time (Chicago)</div>
+                    <div role="option" data-value="America/New_York">Eastern Time (New York)</div>
+                    <div role="option" data-value="America/Sao_Paulo">Brasilia Time (São Paulo)</div>
+                    <div role="option" data-value="America/Argentina/Buenos_Aires">Argentina Time (Buenos Aires)</div>
+                  </div>
+                  <hr role="separator" />
+                  <div role="group" aria-labelledby="timezone-group-europe-africa">
+                    <span role="heading" id="timezone-group-europe-africa">Europe &amp; Africa</span>
+                    <div role="option" data-value="Europe/London">Greenwich Mean Time (London)</div>
+                    <div role="option" data-value="Europe/Berlin">Central European Time (Berlin)</div>
+                    <div role="option" data-value="Europe/Athens">Eastern European Time (Athens)</div>
+                    <div role="option" data-value="Africa/Lagos">West Africa Time (Lagos)</div>
+                    <div role="option" data-value="Africa/Johannesburg">South Africa Time (Johannesburg)</div>
+                  </div>
+                  <hr role="separator" />
+                  <div role="group" aria-labelledby="timezone-group-asia-pacific">
+                    <span role="heading" id="timezone-group-asia-pacific">Asia &amp; Pacific</span>
+                    <div role="option" data-value="Asia/Dubai">Gulf Time (Dubai)</div>
+                    <div role="option" data-value="Asia/Kolkata">India Time (Kolkata)</div>
+                    <div role="option" data-value="Asia/Singapore">Singapore Time (Singapore)</div>
+                    <div role="option" data-value="Asia/Tokyo">Japan Time (Tokyo)</div>
+                    <div role="option" data-value="Australia/Sydney">Australian Eastern Time (Sydney)</div>
+                    <div role="option" data-value="Pacific/Auckland">New Zealand Time (Auckland)</div>
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" name="timezone" value="UTC" />
+            </div>
+          </div>
+
+          <div role="group" class="field" data-orientation="horizontal">
+            <section>
+              <label for="email-notifications">Email notifications</label>
+              <p id="email-notifications-description">Get an email when something important happens on your account.</p>
+            </section>
+            <input type="checkbox" id="email-notifications" name="email_notifications" role="switch" class="input" aria-describedby="email-notifications-description" checked />
+          </div>
+        </form>
+      </section>
+      <footer class="end">
+        <button type="submit" form="account-form" class="btn">Save</button>
+      </footer>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="card">
+      <header>
+        <h2 class="danger-title">Danger zone</h2>
+        <p>Permanently delete your account and all of its data. This cannot be undone.</p>
+      </header>
+      <footer>
+        <button type="button" class="btn" data-variant="destructive" onclick="document.getElementById('delete-account-dialog').showModal()">
+          <svg data-icon="inline-start" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+          Delete account
+        </button>
+      </footer>
+    </div>
+  </main>
+
+  <!-- Confirmation: no close button or backdrop dismissal, so an explicit choice is required. -->
+  <dialog id="delete-account-dialog" class="alert-dialog" aria-labelledby="delete-account-dialog-title" aria-describedby="delete-account-dialog-description">
+    <div>
+      <header>
+        <h2 id="delete-account-dialog-title">Delete your account?</h2>
+        <p id="delete-account-dialog-description">This action cannot be undone. Your account and all of its data will be permanently removed.</p>
+      </header>
+      <footer>
+        <button type="button" class="btn" data-variant="outline" onclick="this.closest('dialog').close()">Cancel</button>
+        <button type="button" class="btn" data-variant="destructive" id="confirm-delete-account">Delete account</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <div id="toaster" class="toaster"></div>
+
+  <script>
+    const toaster = document.getElementById("toaster");
+
+    // Save: native validation runs first; submit only fires when the form is valid.
+    document.getElementById("account-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const settings = Object.fromEntries(new FormData(event.target));
+      settings.email_notifications = document.getElementById("email-notifications").checked;
+
+      // TODO: send `settings` to your backend, then show the toast on success.
+      console.log("Saving settings", settings);
+
+      toaster.toast({
+        category: "success",
+        title: "Settings saved",
+        description: "Your account settings have been updated.",
+      });
+    });
+
+    // Delete: only runs after the user confirms in the alert dialog.
+    document.getElementById("confirm-delete-account").addEventListener("click", (event) => {
+      event.target.closest("dialog").close();
+
+      // TODO: call your delete-account endpoint here.
+      console.log("Account deletion confirmed");
+
+      toaster.toast({
+        category: "info",
+        title: "Account deletion requested",
+        description: "Nothing was deleted: this page is not connected to a backend yet.",
+      });
+    });
+  </script>
+</body>
+</html>

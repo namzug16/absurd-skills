@@ -1,0 +1,18 @@
+{
+  "eval_id": 0,
+  "eval_name": "standalone-settings-page",
+  "prompt": "make me a single standalone settings.html for my side project using basecoat from the cdn (no build step). i want an 'Account' card with name + email fields, a timezone dropdown (the fancy custom one, not the native select), an 'email notifications' toggle, and a Save button that shows a success toast. below it a 'Danger zone' card with a delete account button that asks for confirmation first. should work in dark mode with a toggle in the top right.",
+  "assertions": [
+    "Loads a Basecoat 1.x stylesheet from the CDN",
+    "Loads Basecoat 1.x JavaScript (all bundle, or runtime + select + toast)",
+    "Uses no pre-1.0 compound classes (btn-outline, btn-destructive, ...)",
+    "Custom select uses div.select with listbox, options and a hidden input",
+    "Select popup uses the data-popover container",
+    "Toggle is a native checkbox with role=\"switch\"",
+    "Form controls are wrapped in .field",
+    "Has a .toaster container and triggers a toast via the toast API",
+    "Delete confirmation is a native <dialog class=\"alert-dialog\"> opened with showModal()",
+    "Delete button uses class=\"btn\" with data-variant=\"destructive\"",
+    "Dark mode toggles the dark class on <html> (basecoat.theme or classList)"
+  ]
+}

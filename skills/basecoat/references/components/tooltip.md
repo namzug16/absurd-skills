@@ -1,0 +1,54 @@
+# Tooltip
+
+- JavaScript: none (CSS only)
+
+## Usage
+
+Add `data-tooltip` to the trigger element. Use `data-side` and `data-align` to change the position:
+
+- `data-tooltip`: Tooltip text.
+- `data-side` `Optional`: `top`, `bottom`, `left`, `right`, `inline-start`, or `inline-end`. Defaults to `top`.
+- `data-align` `Optional`: `start`, `center`, or `end`. Defaults to `center`.
+
+Basecoat tooltips are CSS-only and text-only. This intentionally differs from shadcn/ui's composed tooltip content, which can render arbitrary markup and uses a portal.
+
+```html
+<button class="btn" data-variant="outline" data-tooltip="Tooltip text" data-side="bottom" data-align="center">Bottom</button>
+```
+
+## Examples
+
+### Default
+
+```html
+<button class="btn" data-variant="outline" data-tooltip="Default tooltip">Default</button>
+```
+
+### Sides
+
+```html
+<div class="flex flex-wrap gap-2">
+  <button class="btn" data-variant="outline" data-tooltip="Tooltip" data-side="inline-start">Inline Start</button>
+  <button class="btn" data-variant="outline" data-tooltip="Tooltip" data-side="top">Top</button>
+  <button class="btn" data-variant="outline" data-tooltip="Tooltip" data-side="bottom">Bottom</button>
+  <button class="btn" data-variant="outline" data-tooltip="Tooltip" data-side="inline-end">Inline End</button>
+</div>
+```
+
+### Icon button
+
+```html
+<button class="btn" data-variant="ghost" data-size="icon" data-tooltip="Additional information" aria-label="Info"><svg><!-- info --></svg></button>
+```
+
+### Disabled button
+
+```html
+<span class="inline-block" data-tooltip="This feature is currently unavailable"> <button class="btn" data-variant="outline" disabled>Disabled</button></span>
+```
+
+### Link
+
+```html
+<a href="#" class="text-primary text-sm underline-offset-4 hover:underline" data-tooltip="Click to read the documentation">Learn more</a>
+```

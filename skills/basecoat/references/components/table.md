@@ -1,0 +1,113 @@
+# Table
+
+- JavaScript: none (CSS only)
+
+## Usage
+
+Add `class="table"` to your table element. Wrap it in `class="table-container"` when horizontal scrolling is needed.
+
+```html
+<div class="table-container">
+<table class="table">
+  <!-- Content of your table -->
+</table>
+</div>
+```
+
+> **Scrollable tables clip overlays**: Do not place inline popovers, dropdown menus, selects, or tooltips inside `.table-container`. The table container uses horizontal overflow for wide tables, so absolutely positioned overlays can be clipped or create scrollbars. Keep overlay actions outside scrollable table regions, or omit `.table-container` when the table does not need horizontal scrolling.
+
+## Examples
+
+Examples below follow upstream table patterns where they map cleanly to Basecoat's non-portalled HTML model.
+
+### With Footer
+
+```html
+<div class="table-container">
+<table class="table">
+  <caption>A list of your recent invoices.</caption>
+  <thead>
+    <tr>
+      <th class="w-[100px]">Invoice</th>
+      <th>Status</th>
+      <th>Method</th>
+      <th class="text-end">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="font-medium">INV001</td>
+      <td>Paid</td>
+      <td>Credit Card</td>
+      <td class="text-end">$250.00</td>
+    </tr>
+    <tr>
+      <td class="font-medium">INV002</td>
+      <td>Pending</td>
+      <td>PayPal</td>
+      <td class="text-end">$150.00</td>
+    </tr>
+    <tr>
+      <td class="font-medium">INV003</td>
+      <td>Unpaid</td>
+      <td>Bank Transfer</td>
+      <td class="text-end">$350.00</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">Total</td>
+      <td class="text-end">$2,500.00</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+```
+
+### With Actions
+
+```html
+<div class="table-container">
+<table class="table">
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Price</th>
+      <th class="text-end">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="font-medium">Wireless Mouse</td>
+      <td>$29.99</td>
+      <td class="text-end">
+        <div class="inline-flex gap-2">
+          <button type="button" class="btn" data-variant="outline" data-size="sm">Edit</button>
+          <button type="button" class="btn" data-variant="destructive" data-size="sm">Delete</button>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="font-medium">Mechanical Keyboard</td>
+      <td>$129.99</td>
+      <td class="text-end">
+        <div class="inline-flex gap-2">
+          <button type="button" class="btn" data-variant="outline" data-size="sm">Edit</button>
+          <button type="button" class="btn" data-variant="destructive" data-size="sm">Delete</button>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="font-medium">USB-C Hub</td>
+      <td>$49.99</td>
+      <td class="text-end">
+        <div class="inline-flex gap-2">
+          <button type="button" class="btn" data-variant="outline" data-size="sm">Edit</button>
+          <button type="button" class="btn" data-variant="destructive" data-size="sm">Delete</button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+```

@@ -1,0 +1,18 @@
+{
+  "eval_id": 2,
+  "eval_name": "migrate-legacy-markup",
+  "prompt": "we just bumped basecoat-css to 1.0.2 and this page lost most of its styling. can you fix billing.html so it works with the new version? keep the look the same.",
+  "assertions": [
+    "No pre-1.0 compound classes remain",
+    "Does not paper over the problem by loading the compat stylesheet",
+    "Outline button is class=\"btn\" data-variant=\"outline\"",
+    "Small ghost button has data-variant=\"ghost\" and data-size=\"sm\"",
+    "Icon button has data-variant=\"outline\" and data-size=\"icon\"",
+    "Destructive button is class=\"btn\" data-variant=\"destructive\"",
+    "Primary button is a plain class=\"btn\"",
+    "Alert is class=\"alert ...\" with data-variant=\"destructive\"",
+    "Badges are class=\"badge\" with data-variant secondary / outline",
+    "CDN script is bumped off 0.3.2 to a 1.x version",
+    "Preserves the card structure and utility classes (max-w-xl, mb-6)"
+  ]
+}

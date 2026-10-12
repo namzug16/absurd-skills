@@ -1,0 +1,65 @@
+{
+  "expectations": [
+    {
+      "text": "No pre-1.0 compound classes remain",
+      "passed": true,
+      "evidence": "no pre-1.0 compound classes"
+    },
+    {
+      "text": "Does not paper over the problem by loading the compat stylesheet",
+      "passed": true,
+      "evidence": "no compat layer"
+    },
+    {
+      "text": "Outline button is class=\"btn\" data-variant=\"outline\"",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Small ghost button has data-variant=\"ghost\" and data-size=\"sm\"",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Icon button has data-variant=\"outline\" and data-size=\"icon\"",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Destructive button is class=\"btn\" data-variant=\"destructive\"",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Primary button is a plain class=\"btn\"",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Alert is class=\"alert ...\" with data-variant=\"destructive\"",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Badges are class=\"badge\" with data-variant secondary / outline",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "CDN script is bumped off 0.3.2 to a 1.x version",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Preserves the card structure and utility classes (max-w-xl, mb-6)",
+      "passed": true,
+      "evidence": "ok"
+    }
+  ],
+  "summary": {
+    "passed": 11,
+    "failed": 0,
+    "total": 11,
+    "pass_rate": 1.0
+  }
+}

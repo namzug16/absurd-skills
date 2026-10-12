@@ -1,0 +1,65 @@
+{
+  "expectations": [
+    {
+      "text": "Loads a Basecoat 1.x stylesheet from the CDN",
+      "passed": true,
+      "evidence": "found 1.x cdn css"
+    },
+    {
+      "text": "Loads Basecoat 1.x JavaScript (all bundle, or runtime + select + toast)",
+      "passed": true,
+      "evidence": "found 1.x js"
+    },
+    {
+      "text": "Uses no pre-1.0 compound classes (btn-outline, btn-destructive, ...)",
+      "passed": true,
+      "evidence": "no pre-1.0 compound classes"
+    },
+    {
+      "text": "Custom select uses div.select with listbox, options and a hidden input",
+      "passed": true,
+      "evidence": "select structure present"
+    },
+    {
+      "text": "Select popup uses the data-popover container",
+      "passed": true,
+      "evidence": "data-popover present"
+    },
+    {
+      "text": "Toggle is a native checkbox with role=\"switch\"",
+      "passed": true,
+      "evidence": "switch found"
+    },
+    {
+      "text": "Form controls are wrapped in .field",
+      "passed": true,
+      "evidence": ".field used"
+    },
+    {
+      "text": "Has a .toaster container and triggers a toast via the toast API",
+      "passed": true,
+      "evidence": "toaster + .toast({..})"
+    },
+    {
+      "text": "Delete confirmation is a native <dialog class=\"alert-dialog\"> opened with showModal()",
+      "passed": true,
+      "evidence": "alert-dialog + showModal"
+    },
+    {
+      "text": "Delete button uses class=\"btn\" with data-variant=\"destructive\"",
+      "passed": true,
+      "evidence": "found"
+    },
+    {
+      "text": "Dark mode toggles the dark class on <html> (basecoat.theme or classList)",
+      "passed": true,
+      "evidence": "found"
+    }
+  ],
+  "summary": {
+    "passed": 11,
+    "failed": 0,
+    "total": 11,
+    "pass_rate": 1.0
+  }
+}

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings</title>
+
+  <!-- Apply the saved (or system) theme before first paint to avoid a flash. -->
+  <script>
+    (() => {
+      try {
+        const stored = localStorage.getItem("themeMode");
+        if (stored ? stored === "dark" : matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (_) {}
+    })();
+  </script>
+
+  <!-- Basecoat (self-contained CDN build, no Tailwind or build step required) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/js/all.min.js" defer></script>
+
+  <!-- The CDN build ships components only (no Tailwind utilities), so page layout lives here. -->
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    .page {
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 4rem;
+      display: grid;
+      gap: 1.5rem;
+    }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .page-header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .page-header p {
+      margin: 0.25rem 0 0;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+    .stack { display: grid; gap: 1.5rem; }
+    .two-col { display: grid; gap: 1.5rem; }
+    @media (min-width: 640px) {
+      .two-col { grid-template-columns: 1fr 1fr; }
+    }
+    .card > footer.end { justify-content: flex-end; }
+
+    /* Timezone select: full-width trigger, scrollable list */
+    #timezone, #timezone > button { width: 100%; }
+    #timezone-listbox { max-height: 17.5rem; overflow-y: auto; }
+
+    /* Theme toggle icons */
+    .icon-sun { display: none; }
+    .dark .icon-sun { display: inline-flex; }
+    .dark .icon-moon { display: none; }
+    .icon-moon { display: inline-flex; }
+
+    /* Danger zone */
+    .card.danger { border-color: color-mix(in oklab, var(--destructive) 45%, transparent); }
+    .card.danger > header h2 { color: var(--destructive); }
+    .danger-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .danger-row strong { display: block; font-size: 0.875rem; font-weight: 500; }
+    .danger-row span { font-size: 0.875rem; color: var(--muted-foreground); }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="page-header">
+      <div>
+        <h1>Settings</h1>
+        <p>Manage your account and preferences.</p>
+      </div>
+      <button type="button" class="btn" data-variant="outline" data-size="icon"
+              aria-label="Toggle dark mode" title="Toggle dark mode"
+              onclick="window.basecoat.theme.toggle()">
+        <span class="icon-sun"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg></span>
+        <span class="icon-moon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></svg></span>
+      </button>
+    </div>
+
+    <!-- Account -->
+    <div class="card">
+      <header>
+        <h2>Account</h2>
+        <p>Update your profile details and how we reach you.</p>
+      </header>
+      <section>
+        <form id="account-form" class="stack">
+          <div class="two-col">
+            <div role="group" class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" placeholder="Ada Lovelace" autocomplete="name" required />
+            </div>
+            <div role="group" class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" placeholder="ada@example.com" autocomplete="email" required />
+            </div>
+          </div>
+
+          <div role="group" class="field">
+            <label id="timezone-label" for="timezone-trigger">Timezone</label>
+            <div id="timezone" class="select" data-placeholder="Select a timezone">
+              <button type="button" id="timezone-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="timezone-listbox">
+                <span class="truncate">Select a timezone</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+              </button>
+              <div id="timezone-popover" data-popover aria-hidden="true">
+                <div role="listbox" id="timezone-listbox" class="scrollbar-sm" aria-orientation="vertical" aria-labelledby="timezone-trigger">
+                  <div role="group" aria-labelledby="tz-americas">
+                    <span role="heading" id="tz-americas">Americas</span>
+                    <div role="option" data-value="Pacific/Honolulu">Honolulu (UTC-10:00)</div>
+                    <div role="option" data-value="America/Anchorage">Anchorage (UTC-09:00)</div>
+                    <div role="option" data-value="America/Los_Angeles">Los Angeles (UTC-08:00)</div>
+                    <div role="option" data-value="America/Denver">Denver (UTC-07:00)</div>
+                    <div role="option" data-value="America/Chicago">Chicago (UTC-06:00)</div>
+                    <div role="option" data-value="America/Mexico_City">Mexico City (UTC-06:00)</div>
+                    <div role="option" data-value="America/New_York">New York (UTC-05:00)</div>
+                    <div role="option" data-value="America/Bogota">Bogot&aacute; (UTC-05:00)</div>
+                    <div role="option" data-value="America/Santiago">Santiago (UTC-04:00)</div>
+                    <div role="option" data-value="America/Sao_Paulo">S&atilde;o Paulo (UTC-03:00)</div>
+                    <div role="option" data-value="America/Argentina/Buenos_Aires">Buenos Aires (UTC-03:00)</div>
+                  </div>
+                  <div role="group" aria-labelledby="tz-europe-africa">
+                    <span role="heading" id="tz-europe-africa">Europe &amp; Africa</span>
+                    <div role="option" data-value="UTC">UTC (UTC+00:00)</div>
+                    <div role="option" data-value="Europe/London">London (UTC+00:00)</div>
+                    <div role="option" data-value="Europe/Lisbon">Lisbon (UTC+00:00)</div>
+                    <div role="option" data-value="Africa/Lagos">Lagos (UTC+01:00)</div>
+                    <div role="option" data-value="Europe/Berlin">Berlin (UTC+01:00)</div>
+                    <div role="option" data-value="Europe/Paris">Paris (UTC+01:00)</div>
+                    <div role="option" data-value="Europe/Madrid">Madrid (UTC+01:00)</div>
+                    <div role="option" data-value="Africa/Johannesburg">Johannesburg (UTC+02:00)</div>
+                    <div role="option" data-value="Europe/Athens">Athens (UTC+02:00)</div>
+                    <div role="option" data-value="Africa/Nairobi">Nairobi (UTC+03:00)</div>
+                    <div role="option" data-value="Europe/Istanbul">Istanbul (UTC+03:00)</div>
+                  </div>
+                  <div role="group" aria-labelledby="tz-asia">
+                    <span role="heading" id="tz-asia">Asia</span>
+                    <div role="option" data-value="Asia/Dubai">Dubai (UTC+04:00)</div>
+                    <div role="option" data-value="Asia/Karachi">Karachi (UTC+05:00)</div>
+                    <div role="option" data-value="Asia/Kolkata">Kolkata (UTC+05:30)</div>
+                    <div role="option" data-value="Asia/Bangkok">Bangkok (UTC+07:00)</div>
+                    <div role="option" data-value="Asia/Singapore">Singapore (UTC+08:00)</div>
+                    <div role="option" data-value="Asia/Shanghai">Shanghai (UTC+08:00)</div>
+                    <div role="option" data-value="Asia/Seoul">Seoul (UTC+09:00)</div>
+                    <div role="option" data-value="Asia/Tokyo">Tokyo (UTC+09:00)</div>
+                  </div>
+                  <div role="group" aria-labelledby="tz-pacific">
+                    <span role="heading" id="tz-pacific">Australia &amp; Pacific</span>
+                    <div role="option" data-value="Australia/Perth">Perth (UTC+08:00)</div>
+                    <div role="option" data-value="Australia/Adelaide">Adelaide (UTC+09:30)</div>
+                    <div role="option" data-value="Australia/Sydney">Sydney (UTC+10:00)</div>
+                    <div role="option" data-value="Pacific/Auckland">Auckland (UTC+12:00)</div>
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" name="timezone" value="" />
+            </div>
+            <p>Offsets shown are standard time; daylight saving is applied automatically.</p>
+          </div>
+
+          <div role="group" class="field" data-orientation="horizontal">
+            <section>
+              <label for="email-notifications">Email notifications</label>
+              <p id="email-notifications-description">Get product updates and account activity by email.</p>
+            </section>
+            <input type="checkbox" id="email-notifications" name="email_notifications" role="switch" class="input"
+                   aria-describedby="email-notifications-description" checked />
+          </div>
+        </form>
+      </section>
+      <footer class="end">
+        <button type="submit" form="account-form" class="btn">Save</button>
+      </footer>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="card danger">
+      <header>
+        <h2>Danger zone</h2>
+        <p>Irreversible actions. Please be certain.</p>
+      </header>
+      <section>
+        <div class="danger-row">
+          <div>
+            <strong>Delete account</strong>
+            <span>Permanently remove your account and all of its data.</span>
+          </div>
+          <button type="button" class="btn" data-variant="destructive"
+                  onclick="document.getElementById('delete-dialog').showModal()">Delete account</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Delete confirmation -->
+  <dialog id="delete-dialog" class="alert-dialog" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
+    <div>
+      <header>
+        <h2 id="delete-dialog-title">Delete your account?</h2>
+        <p id="delete-dialog-description">This action cannot be undone. Your account and all associated data will be permanently deleted.</p>
+      </header>
+      <footer>
+        <button type="button" class="btn" data-variant="outline" autofocus onclick="this.closest('dialog').close()">Cancel</button>
+        <button type="button" class="btn" data-variant="destructive" id="confirm-delete">Yes, delete account</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- Toasts render here -->
+  <div id="toaster" class="toaster"></div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toast = (config) => document.getElementById("toaster").toast(config);
+      const form = document.getElementById("account-form");
+      const timezone = document.getElementById("timezone");
+
+      // Basecoat's select fires a bubbling "change" event with detail.value.
+      timezone.addEventListener("change", (e) => {
+        if (e.detail && "value" in e.detail) console.debug("timezone:", e.detail.value);
+      });
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault(); // native validation for name/email has already passed here
+
+        const data = Object.fromEntries(new FormData(form));
+        data.email_notifications = form.elements.email_notifications.checked;
+
+        if (!data.timezone) {
+          toast({ category: "error", title: "Pick a timezone", description: "Choose a timezone before saving." });
+          document.getElementById("timezone-trigger").focus();
+          return;
+        }
+
+        // TODO: send `data` to your backend, e.g. fetch("/api/settings", { method: "POST", body: JSON.stringify(data) })
+        console.log("Saving settings", data);
+
+        toast({
+          category: "success",
+          title: "Settings saved",
+          description: "Your account settings have been updated.",
+          cancel: { label: "Dismiss" }
+        });
+      });
+
+      document.getElementById("confirm-delete").addEventListener("click", (e) => {
+        e.target.closest("dialog").close();
+
+        // TODO: call your delete endpoint here.
+        console.log("Account deletion confirmed");
+
+        toast({
+          category: "success",
+          title: "Account deleted",
+          description: "Your account has been scheduled for deletion."
+        });
+      });
+    });
+  </script>
+</body>
+</html>

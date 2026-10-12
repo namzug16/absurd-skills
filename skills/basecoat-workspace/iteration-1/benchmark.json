@@ -1,0 +1,513 @@
+{
+  "metadata": {
+    "skill_name": "basecoat",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-10-12T19:28:56Z",
+    "evals_run": [
+      0,
+      1,
+      2
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 11,
+        "failed": 0,
+        "total": 11,
+        "time_seconds": 117.4,
+        "tokens": 86171,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Loads a Basecoat 1.x stylesheet from the CDN",
+          "passed": true,
+          "evidence": "found 1.x cdn css"
+        },
+        {
+          "text": "Loads Basecoat 1.x JavaScript (all bundle, or runtime + select + toast)",
+          "passed": true,
+          "evidence": "found 1.x js"
+        },
+        {
+          "text": "Uses no pre-1.0 compound classes (btn-outline, btn-destructive, ...)",
+          "passed": true,
+          "evidence": "no pre-1.0 compound classes"
+        },
+        {
+          "text": "Custom select uses div.select with listbox, options and a hidden input",
+          "passed": true,
+          "evidence": "select structure present"
+        },
+        {
+          "text": "Select popup uses the data-popover container",
+          "passed": true,
+          "evidence": "data-popover present"
+        },
+        {
+          "text": "Toggle is a native checkbox with role=\"switch\"",
+          "passed": true,
+          "evidence": "switch found"
+        },
+        {
+          "text": "Form controls are wrapped in .field",
+          "passed": true,
+          "evidence": ".field used"
+        },
+        {
+          "text": "Has a .toaster container and triggers a toast via the toast API",
+          "passed": true,
+          "evidence": "toaster + .toast({..})"
+        },
+        {
+          "text": "Delete confirmation is a native <dialog class=\"alert-dialog\"> opened with showModal()",
+          "passed": true,
+          "evidence": "alert-dialog + showModal"
+        },
+        {
+          "text": "Delete button uses class=\"btn\" with data-variant=\"destructive\"",
+          "passed": true,
+          "evidence": "found"
+        },
+        {
+          "text": "Dark mode toggles the dark class on <html> (basecoat.theme or classList)",
+          "passed": true,
+          "evidence": "found"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 12,
+        "failed": 0,
+        "total": 12,
+        "time_seconds": 105.0,
+        "tokens": 73279,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Extends base.html.jinja and fills the content block",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Uses no pre-1.0 compound classes",
+          "passed": true,
+          "evidence": "no pre-1.0 compound classes"
+        },
+        {
+          "text": "Table uses class=\"table\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Row menu uses .dropdown-menu with data-popover, role=\"menu\" and role=\"menuitem\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Menu trigger is wired with aria-haspopup=\"menu\" and aria-controls",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Per-row ids are unique (derived from member.id or loop index)",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Dropdown is not placed inside a scrolling .table-container",
+          "passed": true,
+          "evidence": "no scrolling wrapper around the table"
+        },
+        {
+          "text": "Avatar uses .avatar with a fallback when avatar_url is None",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Status uses .badge with a variant or color per status",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Remove action is styled as destructive",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Empty state uses the .empty component",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Pagination uses .btn links with page / total_pages",
+          "passed": true,
+          "evidence": "ok"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 11,
+        "failed": 0,
+        "total": 11,
+        "time_seconds": 21.4,
+        "tokens": 47629,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No pre-1.0 compound classes remain",
+          "passed": true,
+          "evidence": "no pre-1.0 compound classes"
+        },
+        {
+          "text": "Does not paper over the problem by loading the compat stylesheet",
+          "passed": true,
+          "evidence": "no compat layer"
+        },
+        {
+          "text": "Outline button is class=\"btn\" data-variant=\"outline\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Small ghost button has data-variant=\"ghost\" and data-size=\"sm\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Icon button has data-variant=\"outline\" and data-size=\"icon\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Destructive button is class=\"btn\" data-variant=\"destructive\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Primary button is a plain class=\"btn\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Alert is class=\"alert ...\" with data-variant=\"destructive\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Badges are class=\"badge\" with data-variant secondary / outline",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "CDN script is bumped off 0.3.2 to a 1.x version",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Preserves the card structure and utility classes (max-w-xl, mb-6)",
+          "passed": true,
+          "evidence": "ok"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 11,
+        "failed": 0,
+        "total": 11,
+        "time_seconds": 122.2,
+        "tokens": 51588,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Loads a Basecoat 1.x stylesheet from the CDN",
+          "passed": true,
+          "evidence": "found 1.x cdn css"
+        },
+        {
+          "text": "Loads Basecoat 1.x JavaScript (all bundle, or runtime + select + toast)",
+          "passed": true,
+          "evidence": "found 1.x js"
+        },
+        {
+          "text": "Uses no pre-1.0 compound classes (btn-outline, btn-destructive, ...)",
+          "passed": true,
+          "evidence": "no pre-1.0 compound classes"
+        },
+        {
+          "text": "Custom select uses div.select with listbox, options and a hidden input",
+          "passed": true,
+          "evidence": "select structure present"
+        },
+        {
+          "text": "Select popup uses the data-popover container",
+          "passed": true,
+          "evidence": "data-popover present"
+        },
+        {
+          "text": "Toggle is a native checkbox with role=\"switch\"",
+          "passed": true,
+          "evidence": "switch found"
+        },
+        {
+          "text": "Form controls are wrapped in .field",
+          "passed": true,
+          "evidence": ".field used"
+        },
+        {
+          "text": "Has a .toaster container and triggers a toast via the toast API",
+          "passed": true,
+          "evidence": "toaster + .toast({..})"
+        },
+        {
+          "text": "Delete confirmation is a native <dialog class=\"alert-dialog\"> opened with showModal()",
+          "passed": true,
+          "evidence": "alert-dialog + showModal"
+        },
+        {
+          "text": "Delete button uses class=\"btn\" with data-variant=\"destructive\"",
+          "passed": true,
+          "evidence": "found"
+        },
+        {
+          "text": "Dark mode toggles the dark class on <html> (basecoat.theme or classList)",
+          "passed": true,
+          "evidence": "found"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.58,
+        "passed": 7,
+        "failed": 5,
+        "total": 12,
+        "time_seconds": 55.3,
+        "tokens": 34663,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Extends base.html.jinja and fills the content block",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Uses no pre-1.0 compound classes",
+          "passed": false,
+          "evidence": "legacy class found: badge-outline"
+        },
+        {
+          "text": "Table uses class=\"table\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Row menu uses .dropdown-menu with data-popover, role=\"menu\" and role=\"menuitem\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Menu trigger is wired with aria-haspopup=\"menu\" and aria-controls",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Per-row ids are unique (derived from member.id or loop index)",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Dropdown is not placed inside a scrolling .table-container",
+          "passed": false,
+          "evidence": "table wrapped in a scrolling container that clips inline menus"
+        },
+        {
+          "text": "Avatar uses .avatar with a fallback when avatar_url is None",
+          "passed": false,
+          "evidence": "no .avatar or no avatar_url conditional"
+        },
+        {
+          "text": "Status uses .badge with a variant or color per status",
+          "passed": false,
+          "evidence": "badge/status mapping missing"
+        },
+        {
+          "text": "Remove action is styled as destructive",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Empty state uses the .empty component",
+          "passed": false,
+          "evidence": "no .empty"
+        },
+        {
+          "text": "Pagination uses .btn links with page / total_pages",
+          "passed": true,
+          "evidence": "ok"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 11,
+        "failed": 0,
+        "total": 11,
+        "time_seconds": 38.5,
+        "tokens": 36914,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No pre-1.0 compound classes remain",
+          "passed": true,
+          "evidence": "no pre-1.0 compound classes"
+        },
+        {
+          "text": "Does not paper over the problem by loading the compat stylesheet",
+          "passed": true,
+          "evidence": "no compat layer"
+        },
+        {
+          "text": "Outline button is class=\"btn\" data-variant=\"outline\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Small ghost button has data-variant=\"ghost\" and data-size=\"sm\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Icon button has data-variant=\"outline\" and data-size=\"icon\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Destructive button is class=\"btn\" data-variant=\"destructive\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Primary button is a plain class=\"btn\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Alert is class=\"alert ...\" with data-variant=\"destructive\"",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Badges are class=\"badge\" with data-variant secondary / outline",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "CDN script is bumped off 0.3.2 to a 1.x version",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Preserves the card structure and utility classes (max-w-xl, mb-6)",
+          "passed": true,
+          "evidence": "ok"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 81.2667,
+        "stddev": 52.2155,
+        "min": 21.4,
+        "max": 117.4
+      },
+      "tokens": {
+        "mean": 69026.3333,
+        "stddev": 19619.7686,
+        "min": 47629,
+        "max": 86171
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.86,
+        "stddev": 0.2425,
+        "min": 0.58,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 72.0,
+        "stddev": 44.2786,
+        "min": 38.5,
+        "max": 122.2
+      },
+      "tokens": {
+        "mean": 41055.0,
+        "stddev": 9191.0183,
+        "min": 34663,
+        "max": 51588
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.14",
+      "time_seconds": "+9.3",
+      "tokens": "+27971"
+    }
+  },
+  "notes": []
+}

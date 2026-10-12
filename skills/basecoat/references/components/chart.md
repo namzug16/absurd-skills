@@ -1,0 +1,218 @@
+# Chart
+
+- JavaScript: required — `basecoat-css/chart` (or the `all` bundle)
+
+> **Beta API**: Chart support is beta. The JavaScript API, generated markup, and option names may change before the stable 1.0 release.
+
+Use Chart.js with Basecoat defaults for themed colors, external tooltips, and optional generated legends.
+
+## Usage
+
+```html
+<canvas id="visitors-chart" aria-label="Monthly visitors"></canvas>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    window.basecoat.chart("#visitors-chart", {
+      type: "bar",
+      labelKey: "month",
+      data: [
+        { month: "Jan", desktop: 186, mobile: 80 },
+        { month: "Feb", desktop: 305, mobile: 200 },
+        { month: "Mar", desktop: 237, mobile: 120 },
+        { month: "Apr", desktop: 73, mobile: 190 },
+        { month: "May", desktop: 209, mobile: 130 },
+        { month: "Jun", desktop: 214, mobile: 140 },
+      ],
+      series: {
+        desktop: { label: "Desktop", color: "var(--chart-1)" },
+        mobile: { label: "Mobile", color: "var(--chart-2)" },
+      },
+    })
+  })
+</script>
+```
+
+`basecoat.chart()` targets the `<canvas>` directly and creates Basecoat's internal `.chart` container for Chart.js sizing. You do not need to add a wrapper or class in your HTML.
+
+Charts default to `aspect-video`. Use a height, `min-h-*`, or `aspect-*` utility on a parent element when you need a different measuring box.
+
+## Legend
+
+Set `legend: true` to generate a Basecoat-styled legend after the canvas.
+
+The generated legend is display-only by default, matching shadcn/ui. Use a Chart.js plugin or custom legend markup if you need click-to-toggle behavior.
+
+```js
+window.basecoat.chart("#visitors-chart", {
+  type: "bar",
+  labelKey: "month",
+  data,
+  series,
+  legend: true,
+})
+```
+
+## Series
+
+`series` maps object keys from each data row to labels, colors, and optional Chart.js dataset settings.
+
+```js
+window.basecoat.chart("#revenue-chart", {
+  type: "line",
+  labelKey: "month",
+  data,
+  series: {
+    recurring: {
+      label: "Recurring",
+      color: "var(--chart-1)",
+      surface: "gradient",
+      dataset: {
+        fill: true,
+        tension: 0.35,
+      },
+    },
+    new: {
+      label: "New",
+      color: "var(--chart-2)",
+      dataset: {
+        borderDash: [4, 4],
+      },
+    },
+  },
+})
+```
+
+## Escape Hatches
+
+Pass raw Chart.js options and plugins through `options` and `plugins`.
+
+```js
+const chart = window.basecoat.chart("#visitors-chart", {
+  type: "bar",
+  labelKey: "month",
+  data,
+  series,
+  options: {
+    indexAxis: "x",
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+    plugins: {
+      tooltip: {
+        mode: "index",
+      },
+    },
+  },
+  plugins: [myChartJsPlugin],
+})
+```
+
+Pass complete Chart.js data through `chartData` when the simplified `data` plus `series` mapper is not enough.
+
+```js
+window.basecoat.chart("#custom-chart", {
+  type: "scatter",
+  chartData: {
+    datasets: [
+      {
+        label: "Samples",
+        data: [{ x: 1, y: 2 }, { x: 2, y: 5 }],
+      },
+    ],
+  },
+  options: {
+    scales: {
+      x: { type: "linear" },
+    },
+  },
+})
+```
+
+`basecoat.chart()` returns the Chart.js instance for single targets and an array of instances for multi-target selectors.
+
+## Examples
+
+### Bar chart - multiple
+
+```html
+<canvas id="chart-example-visitors" aria-label="Monthly visitors by device"></canvas>
+```
+
+### Line chart - linear
+
+```html
+<canvas id="chart-example-line" aria-label="Revenue line chart"></canvas>
+```
+
+### Line chart - step
+
+```html
+<canvas id="chart-example-step" aria-label="Support queue step chart"></canvas>
+```
+
+### Bar chart - stacked
+
+```html
+<canvas id="chart-example-stacked" aria-label="Stacked pipeline bar chart"></canvas>
+```
+
+### Pie chart - donut
+
+```html
+<canvas id="chart-example-donut" aria-label="Traffic source donut chart"></canvas>
+```
+
+### Radar chart
+
+```html
+<canvas id="chart-example-radar" aria-label="Channel performance radar chart"></canvas>
+```
+
+<script is:inline src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+<script is:inline>{`
+(() => {
+  const initChartPage = () => {
+    if (!window.Chart) {
+      requestAnimationFrame(initChartPage)
+      return
+    }
+
+    if (!window.basecoat) {
+${basecoatRuntimeSource}
+    }
+
+    if (!window.basecoat.chart) {
+${chartRuntimeSource}
+    }
+
+${chartExamplesSource}
+  }
+
+  initChartPage()
+})()
+`}</script>
+
+## API
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `type` | `"bar"` | Chart.js chart type. |
+| `labelKey` | `"label"` | Row key used for labels. |
+| `data` | `[]` | Array of row objects, or raw Chart.js data with `datasets`. |
+| `series` | `{}` | Series config mapped from row keys. |
+| `legend` | `false` | Generates a Basecoat legend after the canvas. |
+| `tooltip` | `true` | Uses the Basecoat external tooltip. |
+| `options` | `{}` | Raw Chart.js options. |
+| `plugins` | `[]` | Raw Chart.js plugins. |
+| `chartData` | `undefined` | Complete Chart.js data object. Overrides the data mapper. |
+
+### Series options
+
+| Option | Description |
+| --- | --- |
+| `label` | Display label for legends and tooltips. |
+| `color` | Base color for the series stroke, fill, legend marker, and tooltip marker. |
+| `surface` | Derives a fill from `color`. Use `true` for a translucent fill, `"gradient"` for an upstream-style vertical fade, or `{ from, to }` for custom opacity stops. |
+| `dataset` | Raw Chart.js dataset options. |

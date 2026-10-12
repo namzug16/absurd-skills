@@ -1,0 +1,214 @@
+{#
+  Members list.
+
+  Context:
+    members      list of objects with id, name, email, role,
+                 status ('active' | 'invited' | 'suspended'), avatar_url (may be None)
+    page         current page number (1-based)
+    total_pages  total number of pages
+
+  Assumed routes (adjust to your app):
+    GET  /members/invite
+    GET  /members/<id>/edit
+    POST /members/<id>/resend-invite
+    POST /members/<id>/remove
+  The POST forms include a csrf_token() hidden field only if that helper exists (Flask-WTF).
+#}
+{% extends "base.html.jinja" %}
+
+{% set page = page | default(1) | int %}
+{% set total_pages = total_pages | default(1) | int %}
+
+{% macro csrf_field() -%}
+  {%- if csrf_token is defined -%}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro invite_button(label="Invite member") %}
+  <a href="/members/invite" class="btn">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+    {{ label }}
+  </a>
+{% endmacro %}
+
+{% macro avatar(member) %}
+  {% if member.avatar_url %}
+    <img src="{{ member.avatar_url }}" alt="" loading="lazy" class="size-8 shrink-0 rounded-full object-cover">
+  {% else %}
+    {% set parts = (member.name or member.email or "?").split() %}
+    <span aria-hidden="true" class="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium uppercase">
+      {{- parts[0][:1] }}{% if parts | length > 1 %}{{ parts[-1][:1] }}{% endif -%}
+    </span>
+  {% endif %}
+{% endmacro %}
+
+{% macro status_badge(status) %}
+  {% if status == "active" %}
+    <span class="badge-outline border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-400">
+      <span class="size-1.5 rounded-full bg-green-500" aria-hidden="true"></span>
+      Active
+    </span>
+  {% elif status == "invited" %}
+    <span class="badge-outline border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400">
+      <span class="size-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>
+      Invited
+    </span>
+  {% elif status == "suspended" %}
+    <span class="badge-destructive">Suspended</span>
+  {% else %}
+    <span class="badge-secondary">{{ status | default("Unknown", true) | capitalize }}</span>
+  {% endif %}
+{% endmacro %}
+
+{% macro row_actions(member) %}
+  {% set menu_id = "member-" ~ member.id ~ "-actions" %}
+  <div id="{{ menu_id }}" class="dropdown-menu">
+    <button
+      type="button"
+      id="{{ menu_id }}-trigger"
+      class="btn-icon-ghost size-8"
+      aria-haspopup="menu"
+      aria-controls="{{ menu_id }}-menu"
+      aria-expanded="false"
+      aria-label="Actions for {{ member.name }}"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    </button>
+    <div id="{{ menu_id }}-popover" data-popover data-align="end" aria-hidden="true" class="min-w-44">
+      <div role="menu" id="{{ menu_id }}-menu" aria-labelledby="{{ menu_id }}-trigger">
+        <a role="menuitem" href="/members/{{ member.id }}/edit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+          Edit
+        </a>
+
+        {% if member.status == "invited" %}
+          <form method="post" action="/members/{{ member.id }}/resend-invite" class="contents">
+            {{ csrf_field() }}
+            <button type="submit" role="menuitem" class="w-full text-left">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
+              Resend invite
+            </button>
+          </form>
+        {% endif %}
+
+        <hr role="separator">
+
+        <form
+          method="post"
+          action="/members/{{ member.id }}/remove"
+          class="contents"
+          onsubmit="return confirm('Remove {{ member.name | e | replace("'", "\\'") }} from the team? This cannot be undone.')"
+        >
+          {{ csrf_field() }}
+          <button
+            type="submit"
+            role="menuitem"
+            class="text-destructive hover:bg-destructive/10 focus:bg-destructive/10 aria-selected:bg-destructive/10 hover:text-destructive focus:text-destructive [&_svg]:text-destructive w-full text-left"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            Remove
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endmacro %}
+
+{% block content %}
+  <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-8">
+
+    {# Page header #}
+    <header class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-col gap-1">
+        <h1 class="text-2xl font-semibold tracking-tight">Members</h1>
+        <p class="text-muted-foreground text-sm">Manage who has access to this workspace and what they can do.</p>
+      </div>
+      {{ invite_button() }}
+    </header>
+
+    {% if members %}
+      {# Table #}
+      <div class="overflow-x-auto rounded-lg border">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Member</th>
+              <th scope="col">Email</th>
+              <th scope="col">Role</th>
+              <th scope="col">Status</th>
+              <th scope="col" class="w-12"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in members %}
+              <tr>
+                <td>
+                  <div class="flex items-center gap-3">
+                    {{ avatar(member) }}
+                    <span class="font-medium">{{ member.name }}</span>
+                  </div>
+                </td>
+                <td class="text-muted-foreground">
+                  <a href="mailto:{{ member.email }}" class="hover:text-foreground hover:underline">{{ member.email }}</a>
+                </td>
+                <td>{{ member.role | capitalize }}</td>
+                <td>{{ status_badge(member.status) }}</td>
+                <td class="text-right">{{ row_actions(member) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {# Pagination #}
+      <nav role="navigation" aria-label="Pagination" class="flex items-center justify-between gap-4">
+        <p class="text-muted-foreground text-sm">
+          Page <span class="text-foreground font-medium">{{ page }}</span>
+          of <span class="text-foreground font-medium">{{ total_pages }}</span>
+        </p>
+        <div class="flex items-center gap-2">
+          {% if page > 1 %}
+            <a href="?page={{ page - 1 }}" rel="prev" class="btn-outline">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+              Previous
+            </a>
+          {% else %}
+            <button type="button" class="btn-outline" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+              Previous
+            </button>
+          {% endif %}
+
+          {% if page < total_pages %}
+            <a href="?page={{ page + 1 }}" rel="next" class="btn-outline">
+              Next
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+          {% else %}
+            <button type="button" class="btn-outline" disabled>
+              Next
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          {% endif %}
+        </div>
+      </nav>
+
+    {% else %}
+      {# Empty state #}
+      <div class="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed px-6 py-16 text-center">
+        <div class="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h2 class="text-lg font-semibold">No members yet</h2>
+          <p class="text-muted-foreground max-w-sm text-sm text-balance">
+            Invite your teammates to start collaborating. They will get an email with a link to join.
+          </p>
+        </div>
+        {{ invite_button("Invite your first member") }}
+      </div>
+    {% endif %}
+
+  </div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{
+  "expectations": [
+    {
+      "text": "Extends base.html.jinja and fills the content block",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Uses no pre-1.0 compound classes",
+      "passed": true,
+      "evidence": "no pre-1.0 compound classes"
+    },
+    {
+      "text": "Table uses class=\"table\"",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Row menu uses .dropdown-menu with data-popover, role=\"menu\" and role=\"menuitem\"",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Menu trigger is wired with aria-haspopup=\"menu\" and aria-controls",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Per-row ids are unique (derived from member.id or loop index)",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Dropdown is not placed inside a scrolling .table-container",
+      "passed": true,
+      "evidence": "no scrolling wrapper around the table"
+    },
+    {
+      "text": "Avatar uses .avatar with a fallback when avatar_url is None",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Status uses .badge with a variant or color per status",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Remove action is styled as destructive",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Empty state uses the .empty component",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Pagination uses .btn links with page / total_pages",
+      "passed": true,
+      "evidence": "ok"
+    }
+  ],
+  "summary": {
+    "passed": 12,
+    "failed": 0,
+    "total": 12,
+    "pass_rate": 1.0
+  }
+}

@@ -1,0 +1,256 @@
+# Combobox
+
+- JavaScript: required — `basecoat-css/combobox` (or the `all` bundle)
+- Templates: ships a `combobox()` macro for Jinja and Nunjucks — see [templates](../templates.md)
+
+## Usage
+
+Combobox is input-first. The visible input filters the list; the hidden input stores the submitted value.
+
+```html
+<div id="framework-combobox" class="combobox w-[240px]">
+  <input type="text" role="combobox" placeholder="Select a framework" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="framework-combobox-listbox" /><svg aria-hidden="true" class="combobox-trigger-icon"><!-- icon --></svg>
+  <div id="framework-combobox-popover" data-popover aria-hidden="true">
+    <div role="listbox" id="framework-combobox-listbox" aria-orientation="vertical" data-empty="No items found.">
+      <div role="option" data-value="Next.js">Next.js</div>
+      <div role="option" data-value="SvelteKit">SvelteKit</div>
+      <div role="option" data-value="Nuxt.js">Nuxt.js</div>
+      <div role="option" data-value="Remix">Remix</div>
+      <div role="option" data-value="Astro">Astro</div>
+    </div>
+  </div>
+  <input type="hidden" name="framework" value="" />
+</div>
+```
+
+### HTML structure
+
+- `<div class="combobox">` — Root element. Add `data-auto-highlight="true"` to make the first visible option active when the list opens or filters. Add `data-format="object"` to serialize selected values as objects. Add `data-filter="manual"` when your app owns filtering.
+  - `<input type="text" role="combobox">` — The editable control. It can be a direct child, inside `.input-group`, or inside `data-popover` for popup mode.
+  - `<button aria-haspopup="listbox">` *(optional)* — Opens the list from an input group or popup trigger. In popup mode, include a child with `data-value` and optional `data-placeholder` to display the selected value.
+  - `<button data-clear>` *(optional)* — Clears the current selection. Put the clear icon inside the button.
+  - `<svg class="combobox-trigger-icon">` *(optional)* — Decorative trailing icon for input-style comboboxes. Replace the SVG to customize the icon.
+  - `<div data-popover>` — The suggestions popup. Use `data-side` and `data-align` like Popover.
+  - `<div role="listbox">` — The suggestions list. Add `aria-multiselectable="true"` in multiple mode. The component uses that attribute to render selected chips around the input.
+  - `<div role="option" data-value="...">` — Selectable option. Options can contain custom HTML; use `data-label` when the input should display different text than the rendered content.
+  - `<input type="hidden">` — Submitted value. Single mode stores a string; multiple mode stores a JSON array. With `data-format="object"`, selected values are stored as objects.
+
+### JavaScript API
+
+| API | Type | Description |
+| --- | --- | --- |
+| `change` | Event | Dispatched on selection changes with `event.detail.value` and `event.detail.selected`. |
+| `combobox.setValue(value)` | Method | Sets the selected value from a plain value or `{ value, label }` object. |
+| `combobox.clear()` | Method | Clears the selected value. |
+| `combobox.refresh()` | Method | Rescans options after children change inside the existing `role="listbox"` element. |
+
+## Examples
+
+### Multiple
+
+```html
+<div id="frameworks-combobox" class="combobox w-full" data-auto-highlight="true">
+  <input type="text" role="combobox" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="frameworks-combobox-listbox" />
+  <div id="frameworks-combobox-popover" data-popover aria-hidden="true">
+    <div role="listbox" id="frameworks-combobox-listbox" aria-orientation="vertical" aria-multiselectable="true" data-empty="No items found.">
+      <div role="option" data-value="Next.js">Next.js</div>
+      <div role="option" data-value="SvelteKit">SvelteKit</div>
+      <div role="option" data-value="Nuxt.js">Nuxt.js</div>
+      <div role="option" data-value="Remix">Remix</div>
+      <div role="option" data-value="Astro">Astro</div>
+    </div>
+  </div>
+  <input type="hidden" name="frameworks" value='["Next.js"]' />
+</div>
+```
+
+### Clear button
+
+```html
+<div id="clear-combobox" class="combobox">
+  <div class="input-group">
+    <input type="text" role="combobox" placeholder="Select a framework" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="clear-combobox-listbox" />
+    <span role="group" data-align="inline-end">
+      <button type="button" data-clear aria-label="Clear selection"><svg class="size-4" aria-hidden="true"><!-- icon --></svg></button>
+      <button type="button" class="btn" data-variant="ghost" data-size="icon-xs" aria-label="Open suggestions" aria-haspopup="listbox" aria-expanded="false" aria-controls="clear-combobox-listbox"><svg aria-hidden="true"><!-- icon --></svg></button>
+    </span>
+  </div>
+  <div id="clear-combobox-popover" data-popover aria-hidden="true">
+    <div role="listbox" id="clear-combobox-listbox" aria-orientation="vertical" data-empty="No items found.">
+      <div role="option" data-value="Next.js">Next.js</div>
+      <div role="option" data-value="SvelteKit">SvelteKit</div>
+      <div role="option" data-value="Nuxt.js">Nuxt.js</div>
+      <div role="option" data-value="Remix">Remix</div>
+      <div role="option" data-value="Astro">Astro</div>
+    </div>
+  </div>
+  <input type="hidden" name="framework-clear" value="Next.js" />
+</div>
+```
+
+### Groups
+
+```html
+<div id="timezone-combobox" class="combobox">
+  <input type="text" role="combobox" placeholder="Select a timezone" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="timezone-combobox-listbox" /><svg aria-hidden="true" class="combobox-trigger-icon"><!-- icon --></svg>
+  <div id="timezone-combobox-popover" data-popover aria-hidden="true">
+    <div role="listbox" id="timezone-combobox-listbox" class="scrollbar-sm" aria-orientation="vertical" data-empty="No timezones found.">
+      <div role="group" aria-labelledby="timezone-americas">
+        <div role="heading" id="timezone-americas">Americas</div>
+        <div role="option" data-value="(GMT-5) New York">(GMT-5) New York</div>
+        <div role="option" data-value="(GMT-8) Los Angeles">(GMT-8) Los Angeles</div>
+        <div role="option" data-value="(GMT-6) Chicago">(GMT-6) Chicago</div>
+        <div role="option" data-value="(GMT-5) Toronto">(GMT-5) Toronto</div>
+        <div role="option" data-value="(GMT-8) Vancouver">(GMT-8) Vancouver</div>
+        <div role="option" data-value="(GMT-3) São Paulo">(GMT-3) São Paulo</div>
+      </div>
+      <hr role="separator" />
+      <div role="group" aria-labelledby="timezone-europe">
+        <div role="heading" id="timezone-europe">Europe</div>
+        <div role="option" data-value="(GMT+0) London">(GMT+0) London</div>
+        <div role="option" data-value="(GMT+1) Paris">(GMT+1) Paris</div>
+        <div role="option" data-value="(GMT+1) Berlin">(GMT+1) Berlin</div>
+        <div role="option" data-value="(GMT+1) Rome">(GMT+1) Rome</div>
+        <div role="option" data-value="(GMT+1) Madrid">(GMT+1) Madrid</div>
+        <div role="option" data-value="(GMT+1) Amsterdam">(GMT+1) Amsterdam</div>
+      </div>
+      <hr role="separator" />
+      <div role="group" aria-labelledby="timezone-asia-pacific">
+        <div role="heading" id="timezone-asia-pacific">Asia/Pacific</div>
+        <div role="option" data-value="(GMT+9) Tokyo">(GMT+9) Tokyo</div>
+        <div role="option" data-value="(GMT+8) Shanghai">(GMT+8) Shanghai</div>
+        <div role="option" data-value="(GMT+8) Singapore">(GMT+8) Singapore</div>
+        <div role="option" data-value="(GMT+4) Dubai">(GMT+4) Dubai</div>
+        <div role="option" data-value="(GMT+11) Sydney">(GMT+11) Sydney</div>
+        <div role="option" data-value="(GMT+9) Seoul">(GMT+9) Seoul</div>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" value="" />
+</div>
+```
+
+### Custom items
+
+```html
+<div id="country-combobox" class="combobox">
+  <input type="text" role="combobox" placeholder="Search countries" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="country-combobox-listbox" /><svg aria-hidden="true" class="combobox-trigger-icon"><!-- icon --></svg>
+  <div id="country-combobox-popover" data-popover aria-hidden="true">
+    <div role="listbox" id="country-combobox-listbox" aria-orientation="vertical" data-empty="No items found.">
+      <div role="option" data-value="argentina" data-label="Argentina" data-filter="Argentina South America"><span class="flex flex-col"><span>Argentina</span><span class="text-muted-foreground text-xs">South America</span></span></div>
+      <div role="option" data-value="australia" data-label="Australia" data-filter="Australia Oceania"><span class="flex flex-col"><span>Australia</span><span class="text-muted-foreground text-xs">Oceania</span></span></div>
+      <div role="option" data-value="japan" data-label="Japan" data-filter="Japan Asia"><span class="flex flex-col"><span>Japan</span><span class="text-muted-foreground text-xs">Asia</span></span></div>
+    </div>
+  </div>
+  <input type="hidden" value="" />
+</div>
+```
+
+### Invalid
+
+```html
+<div role="group" class="field" data-invalid="true">
+  <label for="invalid-combobox-input">Framework</label>
+  <div id="invalid-combobox" class="combobox">
+    <input type="text" role="combobox" placeholder="Select a framework" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="invalid-combobox-listbox" id="invalid-combobox-input" aria-invalid="true" /><svg aria-hidden="true" class="combobox-trigger-icon"><!-- icon --></svg>
+    <div id="invalid-combobox-popover" data-popover aria-hidden="true">
+      <div role="listbox" id="invalid-combobox-listbox" aria-orientation="vertical" data-empty="No items found.">
+        <div role="option" data-value="Next.js">Next.js</div>
+        <div role="option" data-value="SvelteKit">SvelteKit</div>
+        <div role="option" data-value="Nuxt.js">Nuxt.js</div>
+        <div role="option" data-value="Remix">Remix</div>
+        <div role="option" data-value="Astro">Astro</div>
+      </div>
+    </div>
+    <input type="hidden" value="" />
+  </div>
+  <p role="alert">Select a framework to continue.</p>
+</div>
+```
+
+### Disabled
+
+```html
+<div id="disabled-combobox" class="combobox">
+  <input type="text" role="combobox" placeholder="Select a framework" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="disabled-combobox-listbox" disabled /><svg aria-hidden="true" class="combobox-trigger-icon"><!-- icon --></svg>
+  <div id="disabled-combobox-popover" data-popover aria-hidden="true">
+    <div role="listbox" id="disabled-combobox-listbox" aria-orientation="vertical">
+      <div role="option" data-value="Next.js">Next.js</div>
+    </div>
+  </div>
+  <input type="hidden" value="" />
+</div>
+```
+
+### Auto highlight
+
+Auto highlight makes the first visible option active when the list opens or filters, so pressing Enter can select it without arrowing first.
+
+```html
+<div id="auto-highlight-combobox" class="combobox" data-auto-highlight="true">
+  <input type="text" role="combobox" placeholder="Select a framework" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="auto-highlight-combobox-listbox" /><svg aria-hidden="true" class="combobox-trigger-icon"><!-- icon --></svg>
+  <div id="auto-highlight-combobox-popover" data-popover aria-hidden="true">
+    <div role="listbox" id="auto-highlight-combobox-listbox" aria-orientation="vertical" data-empty="No items found.">
+      <div role="option" data-value="Next.js">Next.js</div>
+      <div role="option" data-value="SvelteKit">SvelteKit</div>
+      <div role="option" data-value="Nuxt.js">Nuxt.js</div>
+      <div role="option" data-value="Remix">Remix</div>
+      <div role="option" data-value="Astro">Astro</div>
+    </div>
+  </div>
+  <input type="hidden" value="" />
+</div>
+```
+
+### Popup
+
+```html
+<div id="popup-combobox" class="combobox">
+  <button type="button" class="btn w-64 justify-between font-normal" data-variant="outline" aria-haspopup="listbox" aria-expanded="false" aria-controls="popup-combobox-listbox">
+    <span data-value data-placeholder="Select country">Select country</span>
+    <svg aria-hidden="true"><!-- icon --></svg>
+  </button>
+  <div id="popup-combobox-popover" data-popover aria-hidden="true">
+    <div class="input-group">
+      <input type="text" role="combobox" placeholder="Search" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="popup-combobox-listbox" />
+    </div>
+    <div role="listbox" id="popup-combobox-listbox" aria-orientation="vertical" data-empty="No items found.">
+      <div role="option" data-value="argentina" data-label="Argentina">Argentina</div>
+      <div role="option" data-value="australia" data-label="Australia">Australia</div>
+      <div role="option" data-value="brazil" data-label="Brazil">Brazil</div>
+      <div role="option" data-value="canada" data-label="Canada">Canada</div>
+      <div role="option" data-value="japan" data-label="Japan">Japan</div>
+      <div role="option" data-value="united-states" data-label="United States">United States</div>
+    </div>
+  </div>
+  <input type="hidden" value="" />
+</div>
+```
+
+### Input group
+
+```html
+<div id="input-group-combobox" class="combobox w-60">
+  <div class="input-group">
+    <span data-align="inline-start"><svg aria-hidden="true"><!-- icon --></svg></span>
+    <input type="text" role="combobox" placeholder="Select a timezone" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="input-group-combobox-listbox" />
+    <button type="button" class="btn" data-variant="ghost" data-size="icon-xs" data-align="inline-end" aria-label="Open suggestions" aria-haspopup="listbox" aria-expanded="false" aria-controls="input-group-combobox-listbox"><svg aria-hidden="true"><!-- icon --></svg></button>
+  </div>
+  <div id="input-group-combobox-popover" data-popover aria-hidden="true">
+    <div role="listbox" id="input-group-combobox-listbox" aria-orientation="vertical" data-empty="No timezones found.">
+      <div role="group" aria-labelledby="input-group-americas">
+        <div role="heading" id="input-group-americas">Americas</div>
+        <div role="option" data-value="(GMT-5) New York">(GMT-5) New York</div>
+        <div role="option" data-value="(GMT-8) Los Angeles">(GMT-8) Los Angeles</div>
+      </div>
+      <hr role="separator" />
+      <div role="group" aria-labelledby="input-group-europe">
+        <div role="heading" id="input-group-europe">Europe</div>
+        <div role="option" data-value="(GMT+0) London">(GMT+0) London</div>
+        <div role="option" data-value="(GMT+1) Paris">(GMT+1) Paris</div>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" value="" />
+</div>
+```

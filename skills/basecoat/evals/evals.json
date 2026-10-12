@@ -1,0 +1,68 @@
+{
+  "skill_name": "basecoat",
+  "evals": [
+    {
+      "id": 0,
+      "name": "standalone-settings-page",
+      "prompt": "make me a single standalone settings.html for my side project using basecoat from the cdn (no build step). i want an 'Account' card with name + email fields, a timezone dropdown (the fancy custom one, not the native select), an 'email notifications' toggle, and a Save button that shows a success toast. below it a 'Danger zone' card with a delete account button that asks for confirmation first. should work in dark mode with a toggle in the top right.",
+      "expected_output": "One HTML file using Basecoat 1.0 markup: card/field/select/switch/toast/alert-dialog/theme switcher, correct CDN CSS + JS, data-variant attributes instead of legacy classes.",
+      "files": [],
+      "assertions": [
+        "Loads a Basecoat 1.x stylesheet from the CDN",
+        "Loads Basecoat 1.x JavaScript (all bundle, or runtime + select + toast)",
+        "Uses no pre-1.0 compound classes (btn-outline, btn-destructive, ...)",
+        "Custom select uses div.select with listbox, options and a hidden input",
+        "Select popup uses the data-popover container",
+        "Toggle is a native checkbox with role=\"switch\"",
+        "Form controls are wrapped in .field",
+        "Has a .toaster container and triggers a toast via the toast API",
+        "Delete confirmation is a native <dialog class=\"alert-dialog\"> opened with showModal()",
+        "Delete button uses class=\"btn\" with data-variant=\"destructive\"",
+        "Dark mode toggles the dark class on <html> (basecoat.theme or classList)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "jinja-members-table",
+      "prompt": "I have a Flask app that already has Tailwind v4 + basecoat-css 1.0 installed via npm and imports \"basecoat-css/all\" in its JS bundle. Write templates/members.html.jinja (extends \"base.html.jinja\", block name `content`) that lists `members` (each has id, name, email, role, status in 'active'|'invited'|'suspended', avatar_url which may be None). I need: page header with an 'Invite member' button, a table with avatar+name, email, a role column, a colored status badge, and a per-row actions menu (Edit, Resend invite, Remove - remove should look dangerous). Show a nice empty state when there are no members, and prev/next pagination at the bottom using `page` and `total_pages`.",
+      "expected_output": "A Jinja template using Basecoat table, avatar, badge, dropdown-menu (with unique per-row ids and correct roles), empty and pagination patterns; dropdowns not clipped by a scrolling table container.",
+      "files": [],
+      "assertions": [
+        "Extends base.html.jinja and fills the content block",
+        "Uses no pre-1.0 compound classes",
+        "Table uses class=\"table\"",
+        "Row menu uses .dropdown-menu with data-popover, role=\"menu\" and role=\"menuitem\"",
+        "Menu trigger is wired with aria-haspopup=\"menu\" and aria-controls",
+        "Per-row ids are unique (derived from member.id or loop index)",
+        "Dropdown is not placed inside a scrolling .table-container",
+        "Avatar uses .avatar with a fallback when avatar_url is None",
+        "Status uses .badge with a variant or color per status",
+        "Remove action is styled as destructive",
+        "Empty state uses the .empty component",
+        "Pagination uses .btn links with page / total_pages"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "migrate-legacy-markup",
+      "prompt": "we just bumped basecoat-css to 1.0.2 and this page lost most of its styling. can you fix billing.html so it works with the new version? keep the look the same.",
+      "expected_output": "billing.html rewritten with 1.0 API: btn/badge/alert root classes with data-variant/data-size, updated CDN script version, no legacy compound classes.",
+      "files": [
+        "inputs/billing.html"
+      ],
+      "assertions": [
+        "No pre-1.0 compound classes remain",
+        "Does not paper over the problem by loading the compat stylesheet",
+        "Outline button is class=\"btn\" data-variant=\"outline\"",
+        "Small ghost button has data-variant=\"ghost\" and data-size=\"sm\"",
+        "Icon button has data-variant=\"outline\" and data-size=\"icon\"",
+        "Destructive button is class=\"btn\" data-variant=\"destructive\"",
+        "Primary button is a plain class=\"btn\"",
+        "Alert is class=\"alert ...\" with data-variant=\"destructive\"",
+        "Badges are class=\"badge\" with data-variant secondary / outline",
+        "CDN script is bumped off 0.3.2 to a 1.x version",
+        "Preserves the card structure and utility classes (max-w-xl, mb-6)"
+      ]
+    }
+  ]
+}
