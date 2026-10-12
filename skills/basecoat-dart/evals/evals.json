@@ -1,0 +1,67 @@
+{
+  "skill_name": "basecoat-dart",
+  "evals": [
+    {
+      "id": 0,
+      "name": "htmleez-shelf-members",
+      "prompt": "my shelf app renders html with htmleez (lib/server.dart, lib/views/). tailwind v4 + basecoat-css 1.0.2 are already installed through npm and the css/js are served from /assets. the basecoat jinja templates are already in templates/basecoat and lib/basecoat/basecoat.dart is set up. write lib/views/members.dart with a `HTML membersPage(List<Member> members)` where Member has int id, String name, String email, String role. i want a table of members with a per-row actions dropdown (Edit -> /members/<id>/edit, Remove -> hx-delete on /members/<id>, should look dangerous), and an 'Invite member' button that opens a dialog with an email input and a role select (admin/member/viewer, member preselected). names come from user signups so be careful.",
+      "expected_output": "A Dart file using htmleez for page markup and the bundled Basecoat interface (bc.dropdownMenu, bc.dialog, bc.select) bridged with Raw(...), with per-row ids, user data escaped in content positions, and plain Basecoat 1.0 markup for table/field/buttons.",
+      "files": [],
+      "assertions": [
+        "Calls bc.dropdownMenu, bc.dialog and bc.select from the bundled interface instead of hand-writing those three structures",
+        "Macro output enters the htmleez tree through Raw(...) (directly or via a helper)",
+        "Dialog body is produced as an HTML string (toHtml() or a string), not passed as an HTML node",
+        "Each row's dropdown gets a unique id derived from member.id",
+        "The dialog and the select are given explicit ids",
+        "Member names in content positions are escaped (.t or esc(...)), never interpolated raw into a label, title or body",
+        "Remove item carries hx-delete in attrs and is marked destructive (data-variant=\"destructive\")",
+        "Dropdown and dialog triggers are styled through triggerAttrs with class btn",
+        "Role select uses BcItem values admin/member/viewer with selected: 'member'",
+        "Form controls sit in div[role=group].field and the select's label targets <id>-trigger",
+        "Uses no pre-1.0 compound classes (btn-outline, btn-destructive, ...)",
+        "Table with row menus is not wrapped in .table-container"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "jaspr-settings-page",
+      "prompt": "I'm building an admin site with Jaspr 0.23 in server mode (lib/main.server.dart, pages in lib/pages/). Basecoat's CSS is loaded and I vendored the jinja templates into templates/basecoat with lib/basecoat/basecoat.dart next to them. Add lib/pages/settings.dart with a SettingsPage component: tabs for 'Profile' and 'Notifications'. Profile has a name input and a timezone picker using the fancy Basecoat select grouped by continent (a handful of zones is fine), with the user's current zone preselected from a `String timezone` constructor param. Notifications has two switches. Also tell me anything I need to change outside that file.",
+      "expected_output": "A Jaspr component file that renders Basecoat macros through RawText in server-rendered components, builds slot content as HTML strings, uses plain Jaspr markup for non-macro components, and notes the JS script and server-only import requirements.",
+      "files": [],
+      "assertions": [
+        "Macro output is rendered with RawText(...) (not the deprecated raw(), not text())",
+        "Uses bc.select with BcGroup/BcItem and selected taken from the timezone param",
+        "Uses bc.tabs with BcTab entries, or hand-writes .tabs markup as Jaspr elements with correct roles and ids",
+        "Content passed into macro slots (tab panels) is an HTML string, not a Jaspr Component",
+        "select and tabs calls have explicit stable ids",
+        "No macro call sits inside a @client component",
+        "Switches are native checkboxes with role=\"switch\" and inputs are wrapped in .field",
+        "Uses Jaspr 0.23 API: Component build(BuildContext) and package:jaspr/dom.dart elements",
+        "Mentions that Basecoat JavaScript must be loaded (Document head or script tag)",
+        "Mentions keeping the Basecoat instance or FileSystemLoader out of client-compiled code",
+        "Uses no pre-1.0 compound classes"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "setup-and-jinja-layout",
+      "prompt": "we have a small dart shelf backend (bin/server.dart) and want to start rendering html pages from it with jinja templates + basecoat, like our old flask app did. package.json already has tailwindcss 4 and basecoat-css 1.0.2 and builds web/app.css. set everything up: the templates, a base layout with a sidebar (Dashboard, Projects, Settings groups whatever makes sense, current page highlighted) and a toaster, and a /projects page that lists `projects` (id, name, status) with a status select per row. we ship this as a `dart compile exe` binary in a scratch docker image so it can't depend on files lying around at runtime. show me the commands i need to run too.",
+      "expected_output": "Setup steps (dart pub add jinja, vendor script, copy basecoat.dart), Jinja layout and page templates that work on Dart's jinja package, a server that renders through the Basecoat environment, and embedded templates for the compiled binary.",
+      "files": [],
+      "assertions": [
+        "Adds the jinja package and vendors templates into templates/basecoat (vendor script or cp from node_modules/basecoat-css/templates/jinja)",
+        "Uses the bundled basecoat.dart Basecoat class to build the environment rather than a bare Environment",
+        "Templates are embedded for the binary (vendor script --embed with Basecoat.embedded, or an equivalent MapLoader)",
+        "Does not edit the vendored basecoat templates",
+        "Layout renders the sidebar and toaster through the macros",
+        "Current page is marked via the item's current flag / aria-current",
+        "Page template escapes project names with | e (no reliance on autoescaping)",
+        "Any {% call %} block imports its macro in that template; expression calls work as globals",
+        "Per-row select ids are derived from project.id",
+        "Templates avoid Python-only constructs unsupported on Dart jinja (string methods, negative indexes, positional args for defaulted params in own macros)",
+        "Loads Basecoat JavaScript in the layout",
+        "Lists the shell commands to run"
+      ]
+    }
+  ]
+}

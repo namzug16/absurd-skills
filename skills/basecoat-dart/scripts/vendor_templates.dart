@@ -1,0 +1,153 @@
+// Vendors Basecoat's Jinja templates into a Dart project.
+//
+//   dart run vendor_templates.dart [options]
+//
+//   --out <dir>        Destination folder        (default: templates/basecoat)
+//   --version <v>      basecoat-css version to download when it is not in
+//                      node_modules               (default: latest)
+//   --embed <file>     Also write a Dart file with every template under
+//                      --embed-root as a `Map<String, String>` for
+//                      `Basecoat.embedded(...)`.
+//   --embed-root <dir> Folder to embed            (default: parent of --out)
+//   --embed-only       Skip copying; only regenerate the --embed file.
+//
+// Run it from the project root. It uses node_modules/basecoat-css when that
+// exists, so the templates match the installed CSS and JavaScript, and falls
+// back to the jsDelivr CDN otherwise. No package dependencies.
+
+import 'dart:convert';
+import 'dart:io';
+
+const files = [
+  'combobox',
+  'command',
+  'dialog',
+  'dropdown-menu',
+  'popover',
+  'select',
+  'sidebar',
+  'tabs',
+  'toast',
+];
+
+Future<void> main(List<String> arguments) async {
+  final options = <String, String>{};
+  final flags = <String>{};
+  for (var i = 0; i < arguments.length; i++) {
+    final argument = arguments[i];
+    if (!argument.startsWith('--')) fail('Unexpected argument: $argument');
+    if (argument == '--embed-only') {
+      flags.add(argument);
+    } else if (i + 1 < arguments.length) {
+      options[argument] = arguments[++i];
+    } else {
+      fail('Missing value for $argument');
+    }
+  }
+
+  final out = Directory(options['--out'] ?? 'templates/basecoat');
+  final embed = options['--embed'];
+  if (flags.contains('--embed-only') && embed == null) {
+    fail('--embed-only needs --embed <file>');
+  }
+
+  if (!flags.contains('--embed-only')) {
+    final version = await vendor(out, options['--version']);
+    File('${out.path}/.basecoat-version').writeAsStringSync('$version\n');
+    stdout.writeln('Vendored basecoat-css $version templates to ${out.path}/');
+  }
+
+  if (embed != null) {
+    final root = Directory(options['--embed-root'] ?? out.parent.path);
+    final count = writeEmbedded(root, File(embed));
+    stdout.writeln('Embedded $count templates from ${root.path}/ in $embed');
+  }
+}
+
+Never fail(String message) {
+  stderr.writeln(message);
+  exit(64);
+}
+
+/// Copies the templates into [out] and returns the version they came from.
+Future<String> vendor(Directory out, String? requested) async {
+  out.createSync(recursive: true);
+
+  final package = Directory('node_modules/basecoat-css');
+  final manifest = File('${package.path}/package.json');
+  if (manifest.existsSync()) {
+    final installed =
+        (jsonDecode(manifest.readAsStringSync()) as Map)['version'] as String;
+    if (requested == null || requested == installed) {
+      for (final file in files) {
+        File('${package.path}/templates/jinja/$file.html.jinja')
+            .copySync('${out.path}/$file.html.jinja');
+      }
+      return installed;
+    }
+    stderr.writeln(
+      'Warning: node_modules has basecoat-css $installed but $requested was '
+      'requested. Templates should match the CSS and JavaScript you ship.',
+    );
+  }
+
+  final client = HttpClient();
+  try {
+    Future<String> fetch(String url) async {
+      final request = await client.getUrl(Uri.parse(url));
+      final response = await request.close();
+      final body = await response.transform(utf8.decoder).join();
+      if (response.statusCode != 200) {
+        fail('GET $url failed with ${response.statusCode}');
+      }
+      return body;
+    }
+
+    final base =
+        'https://cdn.jsdelivr.net/npm/basecoat-css@${requested ?? 'latest'}';
+    final version =
+        (jsonDecode(await fetch('$base/package.json')) as Map)['version']
+            as String;
+    for (final file in files) {
+      final source = await fetch(
+        'https://cdn.jsdelivr.net/npm/basecoat-css@$version'
+        '/templates/jinja/$file.html.jinja',
+      );
+      File('${out.path}/$file.html.jinja').writeAsStringSync(source);
+    }
+    return version;
+  } finally {
+    client.close();
+  }
+}
+
+/// Writes every template under [root] to [target] as a Dart map keyed by
+/// the path a loader would use (`basecoat/select.html.jinja`).
+int writeEmbedded(Directory root, File target) {
+  if (!root.existsSync()) fail('No such folder: ${root.path}');
+  final prefix = root.absolute.uri.path;
+  final templates = <String, String>{};
+  for (final entity in root.listSync(recursive: true)) {
+    final name = entity.uri.pathSegments.last;
+    if (entity is! File || name.startsWith('.')) continue;
+    final key = entity.absolute.uri.path.substring(prefix.length);
+    templates[Uri.decodeComponent(key)] = entity.readAsStringSync();
+  }
+  final keys = templates.keys.toList()..sort();
+
+  String literal(String value) => jsonEncode(value).replaceAll(r'$', r'\$');
+
+  final buffer = StringBuffer()
+    ..writeln('// GENERATED by vendor_templates.dart. Do not edit.')
+    ..writeln('// Regenerate after changing anything under ${root.path}/.')
+    ..writeln()
+    ..writeln('const Map<String, String> templateSources = {');
+  for (final key in keys) {
+    buffer.writeln('  ${literal(key)}:\n      ${literal(templates[key]!)},');
+  }
+  buffer.writeln('};');
+
+  target.parent.createSync(recursive: true);
+  target.writeAsStringSync(buffer.toString());
+  return keys.length;
+}
