@@ -1,5 +1,6 @@
 // Copy to bin/generate_lucide.dart and run from the application's root.
 // Generator-only dependencies: args, archive, http, path, xml.
+// Supply --version <release> --framework <htmleez|jaspr>; neither is defaulted.
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,16 +10,13 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
 
-// Pin the release here so running without --version is reproducible.
-const lucideVersion = '1.33.0';
-
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
-    ..addOption('version', defaultsTo: lucideVersion)
+    ..addOption('version', help: 'Explicit Lucide release tag (required).')
     ..addOption(
       'framework',
       allowed: ['htmleez', 'jaspr'],
-      defaultsTo: 'htmleez',
+      help: 'Generate only this framework (required).',
     )
     ..addOption('output', defaultsTo: p.join('lib', 'src', 'ui', 'lucide.dart'))
     ..addFlag('help', abbr: 'h', negatable: false);
@@ -26,14 +24,22 @@ Future<void> main(List<String> arguments) async {
   late final ArgResults options;
   try {
     options = parser.parse(arguments);
+    if (options.flag('help')) {
+      stdout.writeln(parser.usage);
+      return;
+    }
     if (options.rest.isNotEmpty) {
       throw FormatException('Unexpected arguments: ${options.rest.join(' ')}');
     }
-    if (!RegExp(r'^\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$')
-        .hasMatch(options.option('version')!)) {
+    final version = options.option('version');
+    if (version == null ||
+        !RegExp(r'^\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$').hasMatch(version)) {
       throw const FormatException(
-        'Use an explicit Lucide release, e.g. 1.33.0.',
+        'Supply --version with an explicit Lucide release tag.',
       );
+    }
+    if (options.option('framework') == null) {
+      throw const FormatException('Supply --framework htmleez or jaspr.');
     }
   } on FormatException catch (error) {
     stderr
@@ -42,11 +48,6 @@ Future<void> main(List<String> arguments) async {
     exitCode = 64;
     return;
   }
-  if (options.flag('help')) {
-    stdout.writeln(parser.usage);
-    return;
-  }
-
   final version = options.option('version')!;
   final framework = options.option('framework')!;
   final client = http.Client();

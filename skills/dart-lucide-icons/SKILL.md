@@ -1,20 +1,21 @@
 ---
 name: dart-lucide-icons
-description: Generate app-owned Lucide SVG icon helpers for Dart applications, including htmleez and Jaspr. Use this skill whenever adding or using Lucide icons in a Dart web app, creating a bin/generate_lucide.dart downloader, generating SVG components from a pinned Lucide release, or upgrading an existing Dart Lucide icon set. Covers all-icon generation, htmleez HTML helpers, and native Jaspr SVG components; not Flutter icon widgets or JavaScript Lucide packages.
+description: Generate app-owned Lucide SVG icon helpers for Dart applications using the project's chosen Lucide release and UI framework. Use this skill whenever adding or using Lucide icons in a Dart web app, creating a bin/generate_lucide.dart downloader, generating SVG components, or upgrading an existing Dart Lucide icon set. Covers all-icon generation for htmleez or Jaspr, generating only the selected framework; not Flutter icon widgets or JavaScript Lucide packages.
 ---
 
 # Lucide icons for Dart
 
-Use a small app-owned generator in `bin/` to download a **pinned Lucide release** and generate **every icon** as a Dart helper. Commit the generated source. At runtime, the application renders inline SVG: no Lucide JavaScript, CDN requests, icon font, or generator dependencies are needed.
+Use a small app-owned generator in `bin/` to download the **project's chosen Lucide release** and generate **every icon** as a Dart helper for **only the UI framework the application uses**. This skill does not prescribe a Lucide version. Record the chosen release in the project's generation command for reproducibility. Commit the generated source. At runtime, the application renders inline SVG: no Lucide JavaScript, CDN requests, icon font, or generator dependencies are needed.
 
-This follows the `absurd-starter` approach: one `Lucide` class, lowerCamelCase methods, 24×24 SVGs, `currentColor`, and a default stroke width of 2. The bundled generator supports htmleez and Jaspr from the same archive.
+Use one `Lucide` class, lowerCamelCase methods, 24×24 SVGs, `currentColor`, and a default stroke width of 2. The bundled generator supports htmleez or Jaspr from the same archive; these are alternative outputs, not components to generate together.
 
 ## Bundled generator
 
-[scripts/generate_lucide.dart](./scripts/generate_lucide.dart) is the complete generator. **Copy it to `bin/generate_lucide.dart` in the target application**, rather than rewriting it or requiring the skill to be installed on the production host. It is intentionally a single file for this small project maintenance task.
+[scripts/generate_lucide.dart](./scripts/generate_lucide.dart) is a standalone, framework-selectable example generator, kept separate from these instructions. **Copy it to `bin/generate_lucide.dart` in the target application** and adapt it to the project's conventions, rather than requiring the skill to be installed on the production host. It is intentionally a single file for this small project maintenance task.
 
 - Downloads `https://github.com/lucide-icons/lucide/releases/download/<version>/lucide-icons-<version>.zip`.
-- Defaults to the explicit reference version `1.33.0`; this is not a claim that it is the latest release.
+- Requires `--version` and `--framework`; there is no hardcoded release or default framework. `--help` works without either.
+- Emits only the selected framework's import and helpers. Jaspr output contains no htmleez components, and vice versa; the other framework is not a required dependency.
 - Generates all SVG icons, sorted by Dart method name, into `lib/src/ui/lucide.dart` by default.
 - Does not unpack archive paths to disk. Parses SVG at generation time with `xml`.
 - Rejects invalid SVG, empty releases, and duplicate Dart names before writing output.
@@ -24,7 +25,7 @@ This follows the `absurd-starter` approach: one `Lucide` class, lowerCamelCase m
 ## Setup workflow
 
 1. Inspect `pubspec.yaml`, existing icon helpers, and `bin/` before changing anything. Reuse an existing compatible generator/API; do not overwrite hand-written UI code. Determine whether the application uses htmleez or Jaspr.
-2. Copy the bundled generator into the application. Keep the framework-specific UI library the project already uses.
+2. Copy the bundled generator into the application. Keep the framework-specific UI library the project already uses; do not add the other library or generate its components. If specializing the copied generator for one framework, remove the unused emitter and framework switch, keeping only the project's renderer.
 3. Add generator-only dependencies as **dev dependencies**, even in a server application:
 
    ```bash
@@ -33,15 +34,16 @@ This follows the `absurd-starter` approach: one `Lucide` class, lowerCamelCase m
 
    The generator uses `archive` 4.x and the typed `ArgResults.option/flag` API from `args` 2.5+. Resolve compatible versions for the project's SDK instead of importing transitive dependencies without declaring them.
 
-4. Pin the desired release by changing `lucideVersion` in the copied generator. For Jaspr, also change the `framework` option's default to `jaspr` so running the script with no arguments cannot regenerate the wrong framework. Keep explicit flags in the project's Makefile or documented generation command if preferred.
+4. Reuse the project's existing Lucide release unless an upgrade is requested. For a new setup without a chosen version, check upstream releases and select a suitable available release. Record that exact tag and the detected framework in the project's Makefile or documented generation command. Do not copy a historical version from an example or silently resolve `latest` on every run.
 5. Run from the **application root**:
 
    ```bash
-   # htmleez
-   dart run bin/generate_lucide.dart --version 1.33.0 --framework htmleez
+    # Set LUCIDE_VERSION to the exact release tag chosen for this project.
+    # htmleez projects: run only this command.
+    dart run bin/generate_lucide.dart --version "$LUCIDE_VERSION" --framework htmleez
 
-   # Jaspr (alternative, not a second command for the same output file)
-   dart run bin/generate_lucide.dart --version 1.33.0 --framework jaspr
+    # Jaspr projects: run only this alternative command.
+    dart run bin/generate_lucide.dart --version "$LUCIDE_VERSION" --framework jaspr
    ```
 
    Use `--output lib/ui/lucide.dart` to match the application's structure. The default output file is replaced on successful generation, so choose a generated-only destination. Do not generate both variants into the same file in an application using both frameworks.
