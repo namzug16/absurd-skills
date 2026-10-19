@@ -13,6 +13,7 @@ This is a collection of agent skills that are done by me and useful to me.
 | [`dart-lucide-icons`](skills/dart-lucide-icons/SKILL.md) | Generate app-owned Lucide SVG helpers for Dart applications using htmleez or Jaspr. Includes a generator for all icons from a pinned Lucide release, with no runtime JavaScript or CDN dependency. |
 | [`dart-tailwind`](skills/dart-tailwind/SKILL.md) | Compile Tailwind CSS for client-rendered, static, and server-rendered Dart web apps with one CSS entrypoint and the CLI, without a local npm project or frontend bundler. Covers Dart source scanning, Jaspr integration, build/watch commands, asset serving, and deployment, with a standalone executable option for Node-free builds. |
 | [`htmleez-html`](skills/htmleez-html/SKILL.md) | Build HTML in Dart with htmleez 1.0: tags, `$("name")("value")` attributes, text and escaping, fragments, raw content, void elements, and rendering. Keeps attributes inline and only extracts long, repeated values into `$`-prefixed helpers. |
+| [`htmx-interactivity`](skills/htmx-interactivity/SKILL.md) | Complete HTMX interactions: button loading states, same-route skeleton loading, boosted navigation, selective preloading, error/retry feedback, request synchronization, and version-aware HTMX 4/hx-live local behavior. |
 | [`relic`](skills/relic/SKILL.md) | Build Dart HTTP servers with Relic's 2.0 prerelease API: apps, routing, middleware, request bodies, query parameters, forms, multipart uploads, cookies, headers, responses, static files, and WebSockets. |
 
 ## Installation

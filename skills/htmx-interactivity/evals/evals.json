@@ -1,0 +1,29 @@
+{
+  "skill_name": "htmx-interactivity",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Our HTMX 2.0.8 reports page queries the database before rendering anything. Show a framework-neutral handler and HTML that immediately renders the layout and a table skeleton, then loads results. Keep one /reports endpoint, preserve ?page=2&status=open, and boost navigation into it. Include empty, failure/retry, and direct-load behavior.",
+      "expected_output": "Same-route query parameter; no slow query in skeleton branch; correct document/fragment distinctions including boosted/history requests; matched outerHTML wrapper without load loop; clean history; explicit failure/retry and no-JS fallback.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Implement HTMX markup and request feedback for a profile form posting to /profile and a standalone refresh button targeting #activity. Currently neither has a spinner and both permit repeated clicks. We use HTMX 2.x. Explain validation errors and network failures. Don't add a JS framework.",
+      "expected_output": "Visible local indicators on the correct request owners, scoped disabling, accessible names, explicit targets, preserved CSRF/form conventions, and deliberate success/422/network failure feedback.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Our authenticated HTMX dashboard renders a skeleton at /dashboard then fetches /dashboard?_content=1. Add preload so hovering navigation makes all data ready before clicking. Responses use Cache-Control: no-store. Also wire live search and status filters to the same region without stale responses winning. Keep it simple and explain limitations.",
+      "expected_output": "Explains skeleton preload does not execute lazy loading and no-store prevents reuse; does not weaken sensitive caching; selective compatible preload only when justified; debounced search and shared synchronization for filters; existing results retained with local pending/error states.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "In our HTMX 4 app, add a collapsible filter panel, a live message character count, and proper loading semantics for a save form. hx-live is already installed. A background refresh must not erase unsaved edits. Keep local state simple and point out differences from HTMX 2. Do not turn this into a JSON-driven SPA.",
+      "expected_output": "Native-first local behavior or verified hx-live bindings; ARIA as appropriate state owner; core hx-disable and request indicators instead of manual fetching; explicit inheritance where needed; correct 4.x event/status semantics; deliberate swap/state lifetime and precise morph input-preservation caveats; safe text bindings and CSP consideration.",
+      "files": []
+    }
+  ]
+}
