@@ -1,5 +1,7 @@
 # Basecoat macros with htmleez
 
+Read `htmleez-html` before editing markup. Use the optional Jinja macro setup in [SKILL.md](../SKILL.md) when this integration is selected; preserve direct htmleez markup in projects that already use it.
+
 [htmleez](https://pub.dev/packages/htmleez) builds HTML from Dart functions: tags are callables taking a list of children and attributes, `'text'.t` is escaped text, `Raw(...)` is unescaped content, and `.toHtml()` renders to a string. It pairs well with the macros because both directions are one call.
 
 | Direction | Code |

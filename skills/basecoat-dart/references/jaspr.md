@@ -1,5 +1,7 @@
 # Basecoat macros in Jaspr
 
+Read the applicable Jaspr skills before editing components. Use the optional Jinja macro setup in [SKILL.md](../SKILL.md) when this integration is selected; preserve native component markup in projects that already use it.
+
 Written against Jaspr 0.23 (`Component build(BuildContext)`, `package:jaspr/dom.dart`, `RawText`). In older versions `RawText` is `raw(...)` and `build` returns an `Iterable<Component>`; match what the project uses.
 
 ## The bridge
@@ -128,7 +130,7 @@ Macro slots (`body`, `trigger`, `footer`, `header`, tab panels) are HTML strings
 
 | Slot content | Do this |
 | --- | --- |
-| Static or data-driven markup | Build the string: a literal, another `bc.*` call, or htmleez (`node.toHtml()`, see [htmleez.md](./htmleez.md)). htmleez is a good fit here because it escapes text by default and nests naturally. |
+| Static or data-driven markup | Build the string: an escaped literal or another `bc.*` call. If the app already uses htmleez, `node.toHtml()` also works (see [htmleez.md](./htmleez.md)); do not add a second renderer just for a slot. |
 | Jaspr components, especially `@client` ones | Skip the macro and write the component's markup as Jaspr elements, following the structure in the `basecoat` skill. `dialog` and `popover` are short. This keeps the children as real components. |
 
 A dialog written directly, with live children:

@@ -62,6 +62,20 @@
         "Loads Basecoat JavaScript in the layout",
         "Lists the shell commands to run"
       ]
+    },
+    {
+      "id": 3,
+      "name": "absurd-direct-markup",
+      "prompt": "Our Relic app uses absurd_templates: abs.yaml has input lib/src/ui/templates, output lib/generated/html.dart, class Html. Basecoat CSS/JS and the shared browser initializer are already set up, with no jinja dependency. Add a reusable profile card with a display name from user input, a Fragment body, and an optional footer. Show the template, Dart composition, and verification commands. Keep our current renderer and asset setup.",
+      "expected_output": "Direct Basecoat HTML in the configured template directory, typed Fragment composition and escaped user text, with no Jinja bridge or generated-file edits.",
+      "files": [],
+      "assertions": [
+        "Uses the Absurd reference and writes Basecoat markup in HTML source templates, not generated Dart",
+        "Does not add jinja, Jaspr, htmleez, macro wrappers, or raw HTML constructors",
+        "Uses typed Fragment props or x-slot for nested markup and escaped interpolation for user text",
+        "Computes any non-null footer check in Dart rather than placing an expression in an x-if condition",
+        "Preserves the existing CSS/JS initialization and recommends abs check followed by abs and Dart checks"
+      ]
     }
   ]
 }
