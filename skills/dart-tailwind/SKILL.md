@@ -1,6 +1,6 @@
 ---
 name: dart-tailwind
-description: Set up and maintain Tailwind CSS for Dart web applications, client-rendered or server-rendered, using a CSS input file and the Tailwind CLI without a package.json, local npm dependencies, or a frontend bundler. Use this skill whenever using Tailwind with Dart web, including Jaspr client, static, and server modes, htmleez, Relic, Shelf, Dart Frog, or HTMX; adding CSS build/watch commands; scanning Dart components or templates for utility classes; fixing missing generated styles; or packaging compiled CSS for deployment. Not for Flutter widget styling, including Flutter Web's non-DOM widget rendering.
+description: Set up and maintain Tailwind CSS for Dart web applications, client-rendered or server-rendered, using a CSS input file and the Tailwind CLI without a package.json, local npm dependencies, or a frontend bundler. Use whenever using Tailwind with Jaspr, htmleez, absurd_templates (Absurd Templates / abs), Relic, Shelf, Dart Frog, or HTMX; adding CSS build/watch commands; scanning Dart components or HTML templates; fixing missing generated styles; or packaging CSS for deployment. Includes renderer-specific references for Jaspr, htmleez, and Absurd. Not for Flutter widget styling, including Flutter Web's non-DOM widget rendering.
 ---
 
 # Tailwind for Dart web
@@ -9,10 +9,22 @@ Write utility classes directly in Dart components or templates, compile one CSS 
 
 Use Tailwind v4's CSS-first configuration for new setups. Do not introduce `package.json`, `node_modules`, Vite, PostCSS, `build_runner`, or `tailwind.config.js` just to compile CSS. Preserve existing working tooling; do not migrate a v3 project implicitly.
 
+## Choose the renderer first
+
+Inspect `abs.yaml`, `pubspec.yaml`, UI sources, the CSS entrypoint, and build commands. Absurd's generated Dart has no runtime dependency, so do not rely on the package manifest alone. For mixed projects, scan each source directory that actually contains UI class literals.
+
+| Renderer | Read | Source and layout |
+| --- | --- | --- |
+| Jaspr | [references/jaspr.md](./references/jaspr.md) | Dart components and mode-specific document/assets |
+| htmleez | [references/htmleez.md](./references/htmleez.md) | Dart HTML builders and shared document head |
+| absurd_templates | [references/absurd-templates.md](./references/absurd-templates.md) | HTML input templates plus non-generated Dart, layout template |
+
+Read the relevant reference and specialized renderer skill before editing markup. The CLI, class-detection, and deployment rules below are shared; do not install another renderer to use Tailwind.
+
 ## Workflow
 
 1. Inspect the existing CSS entrypoint, `pubspec.yaml`, Makefile/build scripts, HTML entrypoint or layout, asset directories, and deployment files. Determine whether the app is client-rendered, statically generated, or server-rendered. Reuse existing names and conventions rather than creating a second pipeline.
-2. Create or update a root `input.css` (or keep the project's existing `index.css` entrypoint). Register the Dart sources that contain class names.
+2. Create or update a root `input.css` (or keep the project's existing `index.css` entrypoint). Register the Dart and/or HTML template sources that contain class names, following the renderer reference.
 3. Add CLI build and watch commands. Prefer the `npx` workflow unless Node/npm is unavailable or the user wants a Node-free build; then use the standalone executable.
 4. Link the generated stylesheet in the HTML entrypoint or shared layout. Use the existing static-file handler or asset build/hosting pipeline.
 5. Rebuild and verify a class from a real Dart component or template is generated and the stylesheet URL responds correctly.
@@ -27,7 +39,7 @@ For a root-level `input.css`:
 @source "./lib/**/*.dart";
 ```
 
-Tailwind scans Dart as plain text, so no Dart-specific plugin is needed. This applies equally to client-side components and server-side templates.
+Tailwind scans source as plain text, so no Dart-specific plugin is needed. The Dart-only example applies to UI built in Dart; Absurd also needs its HTML input directory registered, as shown in its reference.
 
 `@source` paths are relative to the **input stylesheet**, not the generated file. If the input lives at `assets/input.css`, use `../lib/**/*.dart`. Add sources for `bin/`, HTML/Jinja templates, or other directories only when those actually contain UI classes.
 
@@ -117,19 +129,9 @@ Use maps or branches of complete strings for finite variants. For a small set of
 
 Do not generate huge safelists to compensate for avoidable interpolation. For truly runtime values, use validated inline styles or CSS custom properties with a statically written utility, rather than expecting Tailwind to compile new classes per request or client-side state change.
 
-## Jaspr and client-side Dart
-
-Tailwind does not depend on SSR or hydration. In Jaspr client, static, and server modes, put complete utility strings in component class attributes and scan their Dart source files.
-
-- Inspect the project's Jaspr configuration and existing asset convention before choosing the output directory. Generate into an asset location that its build/dev tooling serves and copies into the deployed output; do not assume `public/` is correct for every project.
-- Load the stylesheet once through the HTML entrypoint or document configuration used by that mode. Client-side components can change between complete class strings without rebuilding CSS, provided every possible utility was included at build time.
-- Run Tailwind alongside the Jaspr dev server and before the production asset build/copy. No JavaScript Tailwind runtime or hydration-specific integration is needed.
-- For other DOM-based Dart client apps, follow the same pattern: scan Dart sources, load the compiled CSS in the HTML entrypoint, and include it in the static deployment.
-- Tailwind utilities target HTML elements. They do not style Flutter widgets merely because Flutter is deployed to the web.
-
 ## Serving and deployment
 
-- Add a stylesheet link such as `<link rel="stylesheet" href="/index.css">` to the HTML entrypoint or shared document head. Match the actual asset URL and deployment base path; a root-relative URL may be wrong when hosted under a subpath. Include the viewport meta tag if absent. Consult `htmleez-html` or the applicable Jaspr skills before editing framework-specific markup.
+- Add a stylesheet link such as `<link rel="stylesheet" href="/index.css">` to the HTML entrypoint or shared document head. Match the actual asset URL and deployment base path; a root-relative URL may be wrong when hosted under a subpath. Include the viewport meta tag if absent. Follow the selected renderer reference for placement and markup syntax.
 - For Dart backends, serve the generated asset with a CSS content type through the existing framework's static handler. Preserve route precedence and do not expose the entire project root. For client/static apps, ensure the hosting/build pipeline serves and packages that asset.
 - HTMX fragments use the stylesheet already loaded by the document; they do not need their own stylesheet links or runtime Tailwind script.
 - Build CSS before packaging production assets. Either build in CI/a dedicated build stage or include an up-to-date prebuilt file according to the project's policy. No CLI or Node runtime is needed on the production host or in the browser.

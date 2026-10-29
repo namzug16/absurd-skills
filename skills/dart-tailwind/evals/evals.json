@@ -1,0 +1,43 @@
+{
+  "skill_name": "dart-tailwind",
+  "evals": [
+    {
+      "id": 0,
+      "name": "absurd-template-scanning",
+      "prompt": "Our absurd_templates app's Tailwind build misses utilities that appear only in HTML. abs.yaml sets input lib/src/ui/templates and output lib/generated/html.dart. input.css is at the root and currently scans lib/**/*.dart. Fix scanning, excluding generated output but retaining Dart class variants. Explain where the stylesheet belongs and how CSS and abs builds relate.",
+      "expected_output": "Explicit HTML plus non-generated Dart scanning, layout stylesheet link, independent CSS/template builds and verification with a template-only utility.",
+      "files": [],
+      "assertions": [
+        "Registers lib/src/ui/templates/**/*.html and lib/**/*.dart with paths relative to root input.css",
+        "Excludes lib/generated output and does not use it as the source of template classes",
+        "Places the stylesheet in the shared layout rather than HTMX partials",
+        "Explains that Tailwind reads HTML directly and needs no prior abs generation, while production needs both builds",
+        "Does not add a renderer, frontend bundler, or runtime Tailwind script"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "jaspr-mode-assets",
+      "prompt": "Add Tailwind to an existing Jaspr static app. Components are in lib/, static assets in web/, no local npm project. Give the CSS entrypoint and build/watch commands and explain stylesheet placement and production build order. Do not create a second asset pipeline.",
+      "expected_output": "Jaspr-specific source and document/asset conventions with the shared CLI workflow.",
+      "files": [],
+      "assertions": [
+        "Scans Dart components and generates CSS into the existing web asset convention",
+        "Loads CSS once via the existing document/entrypoint and builds before Jaspr asset packaging",
+        "Does not introduce package.json, a bundler, or a hydration-specific Tailwind runtime"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "htmleez-layout",
+      "prompt": "Our Relic backend uses htmleez 1.0 in lib/views and serves public/index.css at /index.css. Tailwind CLI already works. Show how to add the stylesheet to the shared page and ensure conditional button utilities get scanned. HTMX partials should keep working.",
+      "expected_output": "htmleez stylesheet link in the shared head, scanning complete Dart utility alternatives, no links in partials or new dependencies.",
+      "files": [],
+      "assertions": [
+        "Uses htmleez link with explicit rel and href attributes in the shared head",
+        "Keeps complete conditional utility strings in scanned Dart source",
+        "Does not add stylesheet links to partials, another renderer, or new CSS tooling"
+      ]
+    }
+  ]
+}
