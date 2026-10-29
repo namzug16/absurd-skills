@@ -1,13 +1,25 @@
 ---
 name: dart-lucide-icons
-description: Generate app-owned Lucide SVG icon helpers for Dart applications using the project's chosen Lucide release and UI framework. Use this skill whenever adding or using Lucide icons in a Dart web app, creating a bin/generate_lucide.dart downloader, generating SVG components, or upgrading an existing Dart Lucide icon set. Covers all-icon generation for htmleez or Jaspr, generating only the selected framework; not Flutter icon widgets or JavaScript Lucide packages.
+description: Add and maintain Lucide icons in Dart web apps using Jaspr, htmleez, or absurd_templates (Absurd Templates / abs). Use whenever adding icons, generating SVG helpers, maintaining a pinned Lucide browser asset, or upgrading an icon set. Includes all-icon Dart generation for Jaspr/htmleez and template markup with browser initialization for Absurd; not Flutter icon widgets.
 ---
 
 # Lucide icons for Dart
 
-Use a small app-owned generator in `bin/` to download the **project's chosen Lucide release** and generate **every icon** as a Dart helper for **only the UI framework the application uses**. This skill does not prescribe a Lucide version. Record the chosen release in the project's generation command for reproducibility. Commit the generated source. At runtime, the application renders inline SVG: no Lucide JavaScript, CDN requests, icon font, or generator dependencies are needed.
+Use the **project's chosen Lucide release** and existing icon strategy. This skill does not prescribe a version or migrate working icon integrations. Record the exact release in the project's asset or generation command and preserve the upstream ISC license notice with redistributed code/assets.
 
-Use one `Lucide` class, lowerCamelCase methods, 24×24 SVGs, `currentColor`, and a default stroke width of 2. The bundled generator supports htmleez or Jaspr from the same archive; these are alternative outputs, not components to generate together.
+## Choose the renderer first
+
+Inspect `abs.yaml`, `pubspec.yaml`, UI sources, existing icon helpers, browser initialization, and build commands. Absurd generates self-contained Dart, so the absence of a runtime dependency in `pubspec.yaml` does not rule it out. In mixed projects, follow the renderer used by the markup being changed.
+
+| Renderer | Read | Integration |
+| --- | --- | --- |
+| Jaspr | [references/jaspr.md](./references/jaspr.md) | Generated `Component` helpers |
+| htmleez | [references/htmleez.md](./references/htmleez.md) | Generated `HTML` helpers |
+| absurd_templates | [references/absurd-templates.md](./references/absurd-templates.md) | Template markup and pinned browser JS, or existing static SVG templates |
+
+Read only the relevant reference and the renderer's specialized skill before editing markup. The generator below supports **only Jaspr and htmleez**; skip it for Absurd. Do not add another renderer just to render icons.
+
+For generated Dart helpers, use one `Lucide` class, lowerCamelCase methods, 24×24 SVGs, `currentColor`, and a default stroke width of 2. At runtime these helpers render inline SVG without Lucide JavaScript, CDN requests, or generator dependencies. These guarantees do not describe the browser-JS integration.
 
 ## Bundled generator
 
@@ -22,9 +34,9 @@ Use one `Lucide` class, lowerCamelCase methods, 24×24 SVGs, `currentColor`, and
 - Converts `arrow-right` → `arrowRight` and `circle-check` → `circleCheck`. Prefixes numeric or reserved names with `icon`, e.g. `123` → `icon123`.
 - Records the Lucide version in the generated header. Uses `// dart format off` to keep one method per icon.
 
-## Setup workflow
+## Dart helper setup (Jaspr / htmleez only)
 
-1. Inspect `pubspec.yaml`, existing icon helpers, and `bin/` before changing anything. Reuse an existing compatible generator/API; do not overwrite hand-written UI code. Determine whether the application uses htmleez or Jaspr.
+1. After choosing the renderer above, inspect existing icon helpers and `bin/`. Reuse an existing compatible generator/API; do not overwrite hand-written UI code.
 2. Copy the bundled generator into the application. Keep the framework-specific UI library the project already uses; do not add the other library or generate its components. If specializing the copied generator for one framework, remove the unused emitter and framework switch, keeping only the project's renderer.
 3. Add generator-only dependencies as **dev dependencies**, even in a server application:
 
@@ -52,100 +64,6 @@ Use one `Lucide` class, lowerCamelCase methods, 24×24 SVGs, `currentColor`, and
 
 There is no need for an icon allowlist, usage scanner, `build_runner`, a runtime registry, or a published Dart icon package.
 
-## htmleez
-
-Generated API:
-
-```dart
-static HTML plus([List<HTML> extraContent = const []]);
-```
-
-The generator uses `svg([...defaults, ...extraContent, Raw(paths)])`, matching the reference application. Only the downloaded upstream SVG children are inserted as raw markup. Do not insert user-provided strings through `Raw`.
-
-```dart
-import 'package:htmleez/htmleez.dart';
-import 'lucide.dart'; // Adjust to the project's location.
-
-final addButton = button([
-  $("type")("button"),
-  Lucide.plus([
-    $("class")("size-4"),
-    $("aria-hidden")("true"),
-  ]),
-  'Add item'.t,
-]);
-
-final closeButton = button([
-  $("type")("button"),
-  $("aria-label")("Close"),
-  Lucide.x([$("aria-hidden")("true")]),
-]);
-
-final statusIcon = Lucide.circleCheck([
-  $("class")("size-5 text-green-600"),
-  $("aria-hidden")("true"),
-]);
-```
-
-`extraContent` can carry attributes or children, such as a `<title>`. Attributes are appended after defaults, as in the starter. If overriding default width, height, or stroke attributes, check the installed htmleez renderer's duplicate-attribute behavior; use CSS sizing/color for ordinary icons rather than relying on duplicate HTML attributes.
-
-## Jaspr
-
-Generated API:
-
-```dart
-static Component plus({
-  String? classes,
-  Map<String, String> attributes = const {},
-});
-```
-
-The generator emits `Component.element(tag: 'svg', ...)` and native child elements (`path`, `circle`, etc.). This low-level API is useful for generated SVG tags and avoids depending on whether each SVG shape has a convenience constructor. No `RawText`, server-only HTML injection, or XML parser is needed at runtime.
-
-```dart
-import 'package:jaspr/jaspr.dart';
-import 'package:jaspr/dom.dart';
-import 'lucide.dart'; // Adjust to the project's location.
-
-class AddButton extends StatelessComponent {
-  const AddButton({super.key});
-
-  @override
-  Component build(BuildContext context) => button(
-    attributes: {'type': 'button'},
-    [
-      Lucide.plus(
-        classes: 'size-4',
-        attributes: {'aria-hidden': 'true'},
-      ),
-      Component.text('Add item'),
-    ],
-  );
-}
-
-final closeButton = button(
-  attributes: {'type': 'button', 'aria-label': 'Close'},
-  [Lucide.x(attributes: {'aria-hidden': 'true'})],
-);
-
-final statusIcon = Lucide.circleCheck(
-  classes: 'text-green-600',
-  attributes: {
-    'width': '20',
-    'height': '20',
-    'stroke-width': '1.5',
-    'aria-hidden': 'true',
-  },
-);
-```
-
-Custom attributes are spread after defaults in a single map, so overrides are explicit and produce no duplicate SVG attributes. Use `classes` for CSS classes, not a competing `class` key in `attributes`.
-
-The examples follow current Jaspr documentation reviewed in October 2026: `StatelessComponent.build` returns one `Component`, not the older `Iterable<Component>`/`sync*` API. Check the installed Jaspr version before adapting an older application.
-
-- [Component system and Component.element](https://docs.jaspr.site/concepts/components)
-- [HTML components and dom.dart](https://docs.jaspr.site/concepts/html)
-
 ## Styling and accessibility
 
 - SVG stroke inherits `currentColor`: use ordinary CSS `color` or utility classes.
@@ -153,10 +71,10 @@ The examples follow current Jaspr documentation reviewed in October 2026: `State
 - Decorative icons beside text get `aria-hidden="true"`.
 - For an icon-only button, label the **button** with `aria-label` and hide the SVG from assistive technology.
 - For a standalone meaningful icon, use `role="img"` plus `aria-label` on the SVG instead of `aria-hidden`.
-- Keep Tailwind scanning application Dart source where utility class strings appear.
+- Keep Tailwind scanning the application Dart or HTML template sources where utility class strings appear; see `dart-tailwind`.
 
 ## Upgrades and failures
 
-Change the pinned version and rerun the same framework's generation command. Never patch paths inside the generated file by hand; the next run replaces them. Review API renames/removals and the generated diff before updating callers.
+Change the pinned version and rerun the existing generation or asset-download command. Never patch generated SVG paths or vendored browser JS by hand. Review icon renames/removals and the diff before updating callers. For browser icons, verify both initial page rendering and newly swapped HTMX content.
 
 An HTTP 404 usually means the requested tag or release asset is unavailable; check the exact upstream release rather than silently falling back to `latest`. Parsing or duplicate-name failures should be investigated at the archive/generator boundary, not papered over by skipping icons. The output is built completely before it is written, so download/parse failures leave the existing generated source untouched.

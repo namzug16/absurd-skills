@@ -1,0 +1,56 @@
+{
+  "skill_name": "dart-lucide-icons",
+  "evals": [
+    {
+      "id": 0,
+      "name": "absurd-browser-icons",
+      "prompt": "Add a plus icon to our Add item button and an icon-only close button in lib/src/ui/templates/actions.html. This is an absurd_templates app with abs.yaml, pinned public/js/lucide.min.js, and a shared public/index.js initializer listening to DOMContentLoaded and HTMX 4 htmx:after:swap. Keep that setup. Tell me how to verify swapped content too.",
+      "expected_output": "Template data-lucide placeholders, accessible buttons, existing pinned asset and shared initialization reused; no Dart generator or new renderer.",
+      "files": [],
+      "assertions": [
+        "Uses data-lucide with kebab-case names and labels the icon-only close button",
+        "Reuses the existing browser initializer and HTMX 4 event without per-fragment scripts",
+        "Does not claim the Dart generator supports Absurd or add generator dependencies",
+        "Recommends abs check and regeneration plus initial-load and post-swap icon verification"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "jaspr-generated-icons",
+      "prompt": "Our Jaspr app already generates Lucide helpers from a pinned release into lib/src/ui/lucide.dart with your bundled generator. Show Add item and an icon-only close button using those helpers. Keep everything usable as component trees, without browser Lucide JS.",
+      "expected_output": "Jaspr reference API with Component helpers, classes and attributes, accessible buttons, no htmleez or browser initialization.",
+      "files": [],
+      "assertions": [
+        "Uses Jaspr helpers with named classes/attributes and Component children",
+        "Does not add htmleez, RawText, or a Lucide browser script",
+        "Labels the close button and hides decorative icons"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "htmleez-generated-icons",
+      "prompt": "We use htmleez 1.0 and existing generated Lucide helpers. Show Add item and an icon-only close button using them. If I regenerate, which framework argument do I use? Don't change our pinned version or add another UI package.",
+      "expected_output": "htmleez reference API with positional HTML lists, inline attributes and --framework htmleez only.",
+      "files": [],
+      "assertions": [
+        "Uses positional extraContent lists and htmleez attribute syntax",
+        "Selects --framework htmleez without generating Jaspr output",
+        "Labels the close button and hides decorative icons"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "absurd-browser-setup",
+      "prompt": "Set up Lucide in our new absurd_templates app like absurd-starter. We serve public/ at the root, use HTMX 4, and have a shared layout template and public/index.js, but no Lucide asset yet. Show the Makefile download target, head tags, shared initialization, and a labeled icon-only close button. Use an explicit example release pin, not latest.",
+      "expected_output": "Complete local browser-asset setup with an atomic pinned download, ordered layout scripts, shared initialization on initial load and HTMX 4 swaps, and accessible template placeholders.",
+      "files": [],
+      "assertions": [
+        "Shows a pinned Lucide browser-bundle download into public/js using a temporary file so failures preserve the existing asset",
+        "Shows layout head tags loading /js/lucide.min.js before /index.js without duplicating existing tags",
+        "Shows createIcons initialization on DOMContentLoaded and HTMX 4 htmx:after:swap in shared JavaScript",
+        "Uses a labeled icon-only close button with a decorative data-lucide placeholder",
+        "Explains the example pin, asset serving and deployment, without adding Dart generator dependencies"
+      ]
+    }
+  ]
+}
